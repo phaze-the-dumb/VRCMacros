@@ -1,0 +1,21 @@
+[package]
+name = "vrcm"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libmath = "0.2.1"
+serde_json = "1.0.115"
+tokio = { version = "1.37.0", features = ["full"] }
+enigo = "0.1.3"
+voicemeeter = "0.3.0"
+
+[dependencies.windows]
+version = "0.43.0"
+features = [
+    "Media",
+    "Media_Control",
+    "Foundation",
+]

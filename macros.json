@@ -1,0 +1,142 @@
+{
+  "variables": {
+    "chatbox_type": 0,
+    "song_name": ""
+  },
+  "actions": [
+    {
+      "address": "/avatar/parameters/MusicVolume",
+      "actions": [
+        {
+          "type": "voicemeeter",
+          "strip": 6,
+          "property": "Gain",
+          "value": "data_val:-1"
+        }
+      ]
+    },
+    {
+      "address": "/avatar/parameters/MusicPassthrough",
+      "actions": [
+        {
+          "type": "voicemeeter",
+          "strip": 1,
+          "property": "B1",
+          "value": "data_val:-1"
+        }
+      ]
+    },
+    {
+      "address": "/avatar/parameters/MusicAction",
+      "actions": [
+        {
+          "type": "var_equals",
+          "variable": -1,
+          "value": 1,
+          "then": [
+            {
+              "type": "press_key",
+              "key": "media_prev"
+            }
+          ]
+        },
+        {
+          "type": "var_equals",
+          "variable": -1,
+          "value": 2,
+          "then": [
+            {
+              "type": "press_key",
+              "key": "media_play_pause"
+            }
+          ]
+        },
+        {
+          "type": "var_equals",
+          "variable": -1,
+          "value": 3,
+          "then": [
+            {
+              "type": "press_key",
+              "key": "media_next"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "address": "/avatar/parameters/Chatbox",
+      "actions": [
+        {
+          "type": "set",
+          "variable": 0,
+          "value": "data_val:-1"
+        },
+        {
+          "type": "var_equals",
+          "variable": 0,
+          "value": 0,
+          "then": [
+            {
+              "type": "send_chatbox",
+              "value": ""
+            }
+          ]
+        },
+        {
+          "type": "var_equals",
+          "variable": 0,
+          "value": 1,
+          "then": [
+            {
+              "type": "join_string",
+              "first_string": "♫ ",
+              "last_string": "data_val:1",
+              "then": [
+                {
+                  "type": "send_chatbox",
+                  "value": "data_val:-1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "event": "song_change",
+      "actions": [
+        {
+          "type": "set",
+          "variable": 1,
+          "value": "data_val:-1"
+        }
+      ]
+    },
+    {
+      "event": "update",
+      "actions": [
+        {
+          "type": "var_equals",
+          "variable": 0,
+          "value": 1,
+          "then": [
+            {
+              "type": "join_string",
+              "first_string": "♫ ",
+              "last_string": "data_val:1",
+              "then": [
+                {
+                  "type": "send_chatbox",
+                  "value": "data_val:-1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
