@@ -65,7 +65,7 @@ impl VRCMValue{
           number: Some(val.float.unwrap() as f64),
           string: None,
           reference: None,
-          val_type: VRCMType::Bool
+          val_type: VRCMType::Number
         }
       }
       OSCTypeTag::STRING => {
@@ -151,8 +151,6 @@ async fn main(){
     .unwrap().await
     .unwrap();
 
-  let session = mp.GetCurrentSession().unwrap();
-
   for key in macros["variables"].as_object().unwrap().keys() {
     variable_keys.push(key);
   }
@@ -179,20 +177,27 @@ async fn main(){
     osc::start_server(sender, "127.0.0.1:9001");
   });
 
-  let properties = session.TryGetMediaPropertiesAsync().unwrap().await.unwrap();
-  let song = format!("{} - {}", properties.Title().unwrap(), properties.Artist().unwrap());
+  let session = mp.GetCurrentSession();
 
-  if current_song != song {
-    current_song = song;
+  match session {
+    Ok(session) => {
+      let properties = session.TryGetMediaPropertiesAsync().unwrap().await.unwrap();
+      let song = format!("{} - {}", properties.Title().unwrap(), properties.Artist().unwrap());
 
-    dbg!(&current_song);
+      if current_song != song {
+        current_song = song;
 
-    for event in &events {
-      if event.event == "song_change" {
-        process_actions(event.clone().actions, VRCMValue { number: None, string: Some(current_song.clone()), bool: None, reference: None, val_type: VRCMType::String }, &mut variable_vals);
-        break;
+        dbg!(&current_song);
+
+        for event in &events {
+          if event.event == "song_change" {
+            process_actions(event.clone().actions, VRCMValue { number: None, string: Some(current_song.clone()), bool: None, reference: None, val_type: VRCMType::String }, &mut variable_vals);
+            break;
+          }
+        }
       }
-    }
+    },
+    Err(_) => {}
   }
 
   let mut last_update = SystemTime::now();
@@ -201,22 +206,28 @@ async fn main(){
 
     match message {
       Err(_) => {
-        let properties = session.TryGetMediaPropertiesAsync().unwrap().await.unwrap();
-        let song = format!("{} - {}", properties.Title().unwrap(), properties.Artist().unwrap());
+        
+        let session = mp.GetCurrentSession();
 
-        last_update = SystemTime::now();
+        match session {
+          Ok(session) => {
+            let properties = session.TryGetMediaPropertiesAsync().unwrap().await.unwrap();
+            let song = format!("{} - {}", properties.Title().unwrap(), properties.Artist().unwrap());
 
-        if current_song != song {
-          current_song = song;
+            if current_song != song {
+              current_song = song;
 
-          dbg!(&current_song);
+              dbg!(&current_song);
 
-          for event in &events {
-            if event.event == "song_change" {
-              process_actions(event.clone().actions, VRCMValue { number: None, string: Some(current_song.clone()), bool: None, reference: None, val_type: VRCMType::String }, &mut variable_vals);
-              break;
+              for event in &events {
+                if event.event == "song_change" {
+                  process_actions(event.clone().actions, VRCMValue { number: None, string: Some(current_song.clone()), bool: None, reference: None, val_type: VRCMType::String }, &mut variable_vals);
+                  break;
+                }
+              }
             }
-          }
+          },
+          Err(_) => {}
         }
 
         for event in &events {
@@ -230,20 +241,27 @@ async fn main(){
         if last_update.elapsed().unwrap().as_secs() > 10 {
           last_update = SystemTime::now();
 
-          let properties = session.TryGetMediaPropertiesAsync().unwrap().await.unwrap();
-          let song = format!("{} - {}", properties.Title().unwrap(), properties.Artist().unwrap());
+          let session = mp.GetCurrentSession();
 
-          if current_song != song {
-            current_song = song;
+          match session {
+            Ok(session) => {
+              let properties = session.TryGetMediaPropertiesAsync().unwrap().await.unwrap();
+              let song = format!("{} - {}", properties.Title().unwrap(), properties.Artist().unwrap());
 
-            dbg!(&current_song);
+              if current_song != song {
+                current_song = song;
 
-            for event in &events {
-              if event.event == "song_change" {
-                process_actions(event.clone().actions, VRCMValue { number: None, string: Some(current_song.clone()), bool: None, reference: None, val_type: VRCMType::String }, &mut variable_vals);
-                break;
+                dbg!(&current_song);
+
+                for event in &events {
+                  if event.event == "song_change" {
+                    process_actions(event.clone().actions, VRCMValue { number: None, string: Some(current_song.clone()), bool: None, reference: None, val_type: VRCMType::String }, &mut variable_vals);
+                    break;
+                  }
+                }
               }
-            }
+            },
+            Err(_) => {}
           }
 
           for event in &events {
@@ -308,6 +326,10 @@ fn process_actions( actions: Vec<Action>, def_ref: VRCMValue, variable_vals: &mu
       ActionType::VoiceMeeter => {
         let voicemeeter_options = action.voicemeeter_options.unwrap();
         voicemeeter_options.execute(variable_vals, def_ref.clone());
+      }
+      ActionType::OSCSend => {
+        let osc_options = action.osc_options.unwrap();
+        osc_options.execute(variable_vals, def_ref.clone());
       }
       _ => {}
     }

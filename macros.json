@@ -5,6 +5,39 @@
   },
   "actions": [
     {
+      "address": "/avatar/parameters/LContact",
+      "actions": [
+        {
+          "type": "send_osc",
+          "address": "/avatar/parameters/LContact",
+          "value": "data_val:-1",
+          "ip": "127.0.0.1:9002"
+        }
+      ]
+    },
+    {
+      "address": "/avatar/parameters/RContact",
+      "actions": [
+        {
+          "type": "send_osc",
+          "address": "/avatar/parameters/RContact",
+          "value": "data_val:-1",
+          "ip": "127.0.0.1:9002"
+        }
+      ]
+    },
+    {
+      "address": "/avatar/parameters/HapticsMultiplier",
+      "actions": [
+        {
+          "type": "send_osc",
+          "address": "/avatar/parameters/HapticsMultiplier",
+          "value": "data_val:-1",
+          "ip": "127.0.0.1:9002"
+        }
+      ]
+    },
+    {
       "address": "/avatar/parameters/MusicVolume",
       "actions": [
         {

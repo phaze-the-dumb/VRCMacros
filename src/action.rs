@@ -4,6 +4,7 @@ mod send_chatbox_options;
 mod join_string_options;
 mod press_key_options;
 mod voicemeeter_options;
+mod osc_options;
 
 use serde_json::Value;
 
@@ -13,6 +14,7 @@ use send_chatbox_options::SendChatboxOptions;
 use join_string_options::JoinStringOptions;
 use voicemeeter_options::VoiceMeeterOptions;
 use press_key_options::PressKeyOptions;
+use osc_options::OSCOptions;
 
 #[derive(Debug,Clone)]
 pub enum ActionType{
@@ -22,7 +24,8 @@ pub enum ActionType{
   SendChatbox,
   JoinString,
   PressKey,
-  VoiceMeeter
+  VoiceMeeter,
+  OSCSend
 }
 
 #[derive(Debug,Clone)]
@@ -35,6 +38,7 @@ pub struct Action {
   pub join_string_options: Option<JoinStringOptions>,
   pub press_key_options: Option<PressKeyOptions>,
   pub voicemeeter_options: Option<VoiceMeeterOptions>,
+  pub osc_options: Option<OSCOptions>,
 
   pub then: Vec<Action>,
   pub then_else: Vec<Action>,
@@ -50,6 +54,7 @@ impl Action{
         "join_string" => ActionType::JoinString,
         "press_key" => ActionType::PressKey,
         "voicemeeter" => ActionType::VoiceMeeter,
+        "send_osc" => ActionType::OSCSend,
         _ => ActionType::Unknown
       },
 
@@ -61,7 +66,8 @@ impl Action{
       send_chatbox_options: None,
       join_string_options: None,
       press_key_options: None,
-      voicemeeter_options: None
+      voicemeeter_options: None,
+      osc_options: None
     };
 
     match action.action_type{
@@ -82,6 +88,9 @@ impl Action{
       }
       ActionType::VoiceMeeter => {
         action.voicemeeter_options = Some(VoiceMeeterOptions::new(action_data));
+      }
+      ActionType::OSCSend => {
+        action.osc_options = Some(OSCOptions::new(action_data));
       }
       _ => {}
     }
