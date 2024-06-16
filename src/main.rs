@@ -164,6 +164,7 @@ async fn main(){
 
   let mut actions: Vec<ActionGroup> = Vec::new();
   let mut events: Vec<EventGroup> = Vec::new();
+  let mut relays: Vec<&str> = Vec::new();
 
   for action_data in macros["actions"].as_array().unwrap() {
     actions.push(ActionGroup::new(String::from(action_data["address"].as_str().unwrap()), &action_data["actions"]));
@@ -171,6 +172,10 @@ async fn main(){
 
   for event_data in macros["events"].as_array().unwrap() {
     events.push(EventGroup::new(String::from(event_data["event"].as_str().unwrap()), &event_data["actions"]));
+  }
+
+  for relay_data in macros["relays"].as_array().unwrap() {
+    relays.push(relay_data.as_str().unwrap());
   }
 
   thread::spawn(move || {
@@ -270,6 +275,10 @@ async fn main(){
               break;
             }
           }
+
+          for relay in &relays {
+            osc::send_message_string(&message.address, message.values.clone(), &relay);
+          }
         }
 
         let mut commands: Option<ActionGroup> = None;
@@ -280,7 +289,7 @@ async fn main(){
             break;
           }
         }
-    
+
         match commands{
           None => {},
           Some( commands ) => {
