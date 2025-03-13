@@ -275,10 +275,10 @@ async fn main(){
               break;
             }
           }
+        }
 
-          for relay in &relays {
-            osc::send_message_string(&message.address, message.values.clone(), &relay);
-          }
+        for relay in &relays {
+          osc::send_message_string(&message.address, message.values.clone(), &relay);
         }
 
         let mut commands: Option<ActionGroup> = None;
