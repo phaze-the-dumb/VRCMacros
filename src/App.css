@@ -1,0 +1,72 @@
+@font-face {
+  font-family: Rubik;
+  src: url('/assets/fonts/Rubik-VariableFont_wght.ttf');
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body{
+  background: linear-gradient(-45deg,
+    #12141a 0%, #12141a 10%,
+    #22262e 10%, #22262e 20%,
+    #272e44 20%, #272e44 22%,
+    #1f2129 22%
+  );
+  background-attachment: fixed;
+  color: #fff;
+  font-family: Rubik, 'Courier New';
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6, p{
+  margin: 0;
+}
+
+div[app-centre]{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+div[app-button]{
+  display: inline-block;
+  background: #2a3452;
+  padding: 10px 25px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 5px;
+  transition: 0.25s;
+  min-width: 100px;
+  text-align: center;
+}
+
+div[app-button]:hover{
+  background: #151a29;
+}
+
+div[app-button-minimal]{
+  display: inline-block;
+  background: #424242;
+  padding: 10px 25px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 5px;
+  transition: 0.25s;
+  min-width: 100px;
+  text-align: center;
+  opacity: 0.5;
+}
+
+div[app-button-minimal]:hover{
+  background: #525252;
+}
+
+div[app-col]{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
