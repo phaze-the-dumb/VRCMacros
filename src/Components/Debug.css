@@ -1,0 +1,8 @@
+div[app-debug-el]{
+  padding: 10px;
+  background: #272e44;
+  margin: 10px;
+  border-radius: 5px;
+  box-shadow: #00ccff 0 0 10px;
+  transition: 0.5s;
+}

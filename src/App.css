@@ -22,14 +22,23 @@ body{
 
 h1, h2, h3, h4, h5, h6, p{
   margin: 0;
+  font-weight: 500;
 }
 
-div[app-centre]{
+div[app-carousel]{
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
+  top: 10px;
+  left: 220px;
+  width: calc(100vw - 230px);
+  height: calc(100vh - 20px);
+  overflow: hidden;
+}
+
+div[app-page]{
+  width: calc(100vw - 230px);
+  height: calc(100vh - 20px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 div[app-button]{
@@ -67,6 +76,8 @@ div[app-button-minimal]:hover{
 
 div[app-col]{
   display: flex;
-  justify-content: center;
-  align-items: center;
+}
+
+div[app-col] > div{
+  width: 50%;
 }

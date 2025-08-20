@@ -2,7 +2,9 @@
 
 use std::{ net::UdpSocket, sync::mpsc::Sender };
 
-#[derive(Debug, Clone)]
+use serde::Serialize;
+
+#[derive(Debug, Clone, Serialize)]
 pub enum OSCValue{
   Int(i32),
   Float(f32),
@@ -10,12 +12,13 @@ pub enum OSCValue{
   String(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize)]
 pub struct OSCMessage{
   pub address: String,
   pub values: Vec<OSCValue>
 }
 
+// TODO: implement osc bundles
 pub fn start_server( sender: Sender<OSCMessage>, addr: &str ) {
   let socket = UdpSocket::bind(addr).unwrap();
 

@@ -1,10 +1,12 @@
 use std::fs;
 
-use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
+use sqlx::{ migrate::MigrateDatabase, Sqlite, SqlitePool };
 
-use crate::utils::config::Config;
+use crate::{ setup::setup, utils::config::Config };
 
+mod setup;
 mod utils;
+mod osc;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[tokio::main]
@@ -26,7 +28,7 @@ pub async fn run() {
   if !db_file.exists(){ Sqlite::create_database(db_file.to_str().unwrap()).await.unwrap(); }
 
   let conf_file = container_folder.join("VRCMacros.json");
-  if !conf_file.exists(){ fs::write(&conf_file, "{ \"setup_complete\": false }").unwrap() }
+  if !conf_file.exists(){ fs::write(&conf_file, "{}").unwrap() }
 
   let pool = SqlitePool::connect(db_file.to_str().unwrap()).await.unwrap();
   let conf = Config::new(conf_file);
@@ -36,6 +38,11 @@ pub async fn run() {
     .invoke_handler(tauri::generate_handler![])
     .manage(pool)
     .manage(conf)
+    .setup(| app | {
+      setup(app);
+
+      Ok(())
+    })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

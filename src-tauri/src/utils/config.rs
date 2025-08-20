@@ -1,7 +1,7 @@
 use std::{ collections::HashMap, fs, path::PathBuf, sync::Mutex };
 
 use serde::{ Deserialize, Serialize };
-use serde_json::{json, Value};
+use serde_json::Value;
 
 #[derive(Clone, Deserialize, Serialize)]
 pub enum ConfigValue{
