@@ -1,9 +1,11 @@
-use std::fs;
+use std::{fs, sync::Mutex};
 
 use sqlx::{ migrate::MigrateDatabase, Sqlite, SqlitePool };
+use frontend_calls::*;
 
 use crate::{ setup::setup, utils::config::Config };
 
+mod frontend_calls;
 mod setup;
 mod utils;
 mod osc;
@@ -33,13 +35,18 @@ pub async fn run() {
   let pool = SqlitePool::connect(db_file.to_str().unwrap()).await.unwrap();
   let conf = Config::new(conf_file);
 
+  static ADDRESSES: Mutex<Vec<String>> = Mutex::new(Vec::new());
+
   tauri::Builder::default()
     .plugin(tauri_plugin_opener::init())
-    .invoke_handler(tauri::generate_handler![])
+    .invoke_handler(tauri::generate_handler![
+      get_addresses::get_addresses
+    ])
     .manage(pool)
     .manage(conf)
+    .manage(&ADDRESSES)
     .setup(| app | {
-      setup(app);
+      setup(app, &ADDRESSES);
 
       Ok(())
     })

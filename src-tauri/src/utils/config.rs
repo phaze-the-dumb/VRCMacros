@@ -28,7 +28,7 @@ impl Config{
     }
 
     Config {
-      store: Mutex::new(hashmap)
+      store: Mutex::new(hashmap),
     }
   }
 

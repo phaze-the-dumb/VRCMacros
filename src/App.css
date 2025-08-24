@@ -5,6 +5,7 @@
 
 * {
   box-sizing: border-box;
+  -webkit-user-select: none;
 }
 
 body{
@@ -23,6 +24,10 @@ body{
 h1, h2, h3, h4, h5, h6, p{
   margin: 0;
   font-weight: 500;
+}
+
+span{
+  -webkit-user-select: auto;
 }
 
 div[app-carousel]{
@@ -78,6 +83,26 @@ div[app-col]{
   display: flex;
 }
 
-div[app-col] > div{
+div[app-col-50]{
+  display: flex;
+}
+
+div[app-col-50] > div{
   width: 50%;
+}
+
+div[app-icon]{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+  transition: 0.1s;
+}
+
+div[app-icon]:hover{
+  opacity: 0.75;
 }

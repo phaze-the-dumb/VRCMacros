@@ -50,10 +50,10 @@ export let Debug = ( props: DebugProps ) => {
         el.style.boxShadow = '#00ccff 0 0 10px';
         debugContainer.insertBefore(el, debugContainer.firstChild);
 
-        el.innerHTML = `<div>${ ev.payload.address }</div><div>${ formatValuesForDebug(ev.payload.values) }</div>`;
+        el.innerHTML = `<div><span>${ ev.payload.address }</span></div><div>${ formatValuesForDebug(ev.payload.values) }</div>`;
         setTimeout(() => { el.style.boxShadow = '#00ccff 0 0 0px'; })
       } else{
-        el = <div app-debug-el app-col><div>{ ev.payload.address }</div><div>{ formatValuesForDebug(ev.payload.values) }</div></div> as Node;
+        el = <div app-debug-el app-col-50><div><span>{ ev.payload.address }</span></div><div>{ formatValuesForDebug(ev.payload.values) }</div></div> as Node;
 
         el.style.boxShadow = '#00ccff 0 0 10px';
         debugContainer.insertBefore(el, debugContainer.firstChild);

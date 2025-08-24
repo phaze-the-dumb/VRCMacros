@@ -1,7 +1,6 @@
 import "./App.css";
 
-import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
-import { listen } from "@tauri-apps/api/event";
+import { createEffect, createSignal } from "solid-js";
 
 import { Sidebar } from "./Components/Sidebar";
 import { Actions } from "./Components/Actions";
@@ -13,10 +12,6 @@ import { Debug } from "./Components/Debug";
 let App = () => {
   let [ page, setPage ] = createSignal(0);
   let carousel!: HTMLDivElement;
-
-  onMount(async () => {
-
-  });
 
   createEffect(() => {
     let pagenum = page();
