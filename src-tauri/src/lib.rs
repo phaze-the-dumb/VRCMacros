@@ -1,11 +1,11 @@
-use std::{fs, sync::Mutex};
+use std::{ fs, sync::Mutex };
 
-use sqlx::{ migrate::MigrateDatabase, Sqlite, SqlitePool };
 use frontend_calls::*;
 
 use crate::{ setup::setup, utils::config::Config };
 
 mod frontend_calls;
+mod structs;
 mod setup;
 mod utils;
 mod osc;
@@ -26,13 +26,7 @@ pub async fn run() {
     }
   }
 
-  let db_file = container_folder.join("VRCMacros.db");
-  if !db_file.exists(){ Sqlite::create_database(db_file.to_str().unwrap()).await.unwrap(); }
-
-  let conf_file = container_folder.join("VRCMacros.json");
-  if !conf_file.exists(){ fs::write(&conf_file, "{}").unwrap() }
-
-  let pool = SqlitePool::connect(db_file.to_str().unwrap()).await.unwrap();
+  let conf_file = container_folder.join("conf");
   let conf = Config::new(conf_file);
 
   static ADDRESSES: Mutex<Vec<String>> = Mutex::new(Vec::new());
@@ -40,14 +34,22 @@ pub async fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_opener::init())
     .invoke_handler(tauri::generate_handler![
-      get_addresses::get_addresses
+      get_addresses::get_addresses,
+      get_actions::get_actions,
+      get_actions::get_action,
+
+      triggers::new_trigger,
+      triggers::rm_trigger,
+      triggers::add_trigger_action,
+      triggers::rm_trigger_action,
+      triggers::set_trigger_action_type,
+      triggers::set_trigger_address,
+      triggers::list_triggers,
     ])
-    .manage(pool)
     .manage(conf)
     .manage(&ADDRESSES)
     .setup(| app | {
       setup(app, &ADDRESSES);
-
       Ok(())
     })
     .run(tauri::generate_context!())

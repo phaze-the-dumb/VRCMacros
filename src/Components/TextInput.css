@@ -18,6 +18,9 @@ div[input-dropdown]{
   float: left;
   border-radius: 5px;
 
+  max-height: 300px;
+  overflow-y: auto;
+
   background: #525252;
   z-index: 50;
 }

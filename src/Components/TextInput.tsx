@@ -5,7 +5,8 @@ import { createSignal, For, Show } from "solid-js"
 export interface TextInputProps{
   placeholder: string,
   value?: string,
-  requestSuggestions?: ( text: string ) => Promise<string[]>
+  requestSuggestions?: ( text: string ) => Promise<string[]>,
+  change?: ( text: string ) => void
 }
 
 export let TextInput = ( props: TextInputProps ) => {
@@ -26,13 +27,15 @@ export let TextInput = ( props: TextInputProps ) => {
       if(s != suggestions()){
         setSuggestions(s);
 
-        setSuggestionsOpen(s !== null && s.length > 0 && input.value.length > 0);
-        changeSelection(() => { suggestionsIndex = 0; });
+        let open = s !== null && s.length > 0 && input.value.length > 0;
+
+        setSuggestionsOpen(open);
+        if(open)changeSelection(() => { suggestionsIndex = 0; });
       }
     }
   }
 
-  let onKeyUp = ( ev: KeyboardEvent ) => {
+  let onKeyDown = ( ev: KeyboardEvent ) => {
     switch(ev.key){
       case 'ArrowDown':
         changeSelection(() => {
@@ -50,6 +53,7 @@ export let TextInput = ( props: TextInputProps ) => {
         let currentDiv = suggestionsContainer.children[suggestionsIndex];
         if(currentDiv)input.value = currentDiv.innerHTML;
 
+        props.change ? props.change(input.value) : null
         setSuggestionsOpen(false);
         break;
     }
@@ -60,6 +64,9 @@ export let TextInput = ( props: TextInputProps ) => {
       child.classList.remove('suggestion-selected');
 
     cb();
+
+    let height = suggestionsIndex * 19;
+    suggestionsContainer.scrollTo(0, height - 150);
 
     let currentDiv = suggestionsContainer.children[suggestionsIndex];
     if(currentDiv)currentDiv.classList.add('suggestion-selected');
@@ -73,8 +80,10 @@ export let TextInput = ( props: TextInputProps ) => {
           type="text"
           placeholder={ props.placeholder }
           value={ props.value || "" }
+          onChange={() => props.change ? props.change(input.value) : null}
           onInput={onInput}
-          onKeyUp={onKeyUp}
+          onKeyDown={onKeyDown}
+          onFocusOut={() => setSuggestionsOpen(false)}
           ref={input} />
 
         <Show when={suggestionsOpen()}>

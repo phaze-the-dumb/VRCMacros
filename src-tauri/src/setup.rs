@@ -20,8 +20,6 @@ pub fn setup( app: &mut App, addresses: &'static Mutex<Vec<String>> ){
       window.emit("osc-message", &message).unwrap();
 
       let addr = message.address.clone();
-      dbg!(&addr);
-
       let mut addresses = addresses.lock().unwrap();
       if !addresses.contains(&addr){ addresses.push(addr); }
     }
