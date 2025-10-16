@@ -6,6 +6,7 @@ import { TextInput } from './components/TextInput';
 import { invoke } from '@tauri-apps/api/core';
 import { OSCMessage } from './structs/OscMessage';
 import { ParameterList } from './components/ParameterList';
+import { NodeManager } from './Mangers/NodeManager';
 
 export interface ControlBarProps{
   node: Accessor<Node | null>,
@@ -55,6 +56,8 @@ export let ControlBar = ( props: ControlBarProps ) => {
 
                         item.value = text;
                         node.onStaticsUpdate(node);
+                        
+                        NodeManager.Instance.UpdateConfig();
                       }} />
                   </div>
                 </Match>
@@ -79,6 +82,8 @@ export let ControlBar = ( props: ControlBarProps ) => {
 
                         item.value = value;
                         node.onStaticsUpdate(node);
+
+                        NodeManager.Instance.UpdateConfig();
                       }} />
                   </Show>
                 </Match>

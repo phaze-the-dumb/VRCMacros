@@ -14,7 +14,7 @@ export let CanvasContextMenu: ContextMenuItem[] = [
 
       let node: Node = {
         name: 'OSC Trigger',
-        id: 'trigger',
+        id: NodeManager.Instance.GetNewNodeId(),
         x: pos[0],
         y: pos[1],
         w: 200,
@@ -94,6 +94,7 @@ export let CanvasContextMenu: ContextMenuItem[] = [
             });
 
             node.h = 60 + (parameters.length + 1) * 30;
+            NodeManager.Instance.UpdateConfig();
           })();
         }
       };
@@ -115,7 +116,7 @@ export let CanvasContextMenu: ContextMenuItem[] = [
 
             let node: Node = {
               name: 'If Equals',
-              id: 'ifeq',
+              id: NodeManager.Instance.GetNewNodeId(),
               x: pos[0],
               y: pos[1],
               w: 220,
@@ -191,7 +192,7 @@ export let CanvasContextMenu: ContextMenuItem[] = [
 
             let node: Node = {
               name: 'String',
-              id: 'static-string',
+              id: NodeManager.Instance.GetNewNodeId(),
               x: pos[0],
               y: pos[1],
               w: 200,
@@ -223,7 +224,7 @@ export let CanvasContextMenu: ContextMenuItem[] = [
 
             let node: Node = {
               name: 'Int',
-              id: 'static-int',
+              id: NodeManager.Instance.GetNewNodeId(),
               x: pos[0],
               y: pos[1],
               w: 200,
@@ -266,7 +267,7 @@ export let CanvasContextMenu: ContextMenuItem[] = [
 
             let node: Node = {
               name: 'Send Chatbox',
-              id: 'send-chatbox',
+              id: NodeManager.Instance.GetNewNodeId(),
               x: pos[0],
               y: pos[1],
               w: 200,

@@ -1,6 +1,6 @@
 export interface Node{
   name: string,
-  id: string,
+  id: number,
   x: number,
   y: number,
   w: number,
@@ -21,7 +21,7 @@ export interface NodeIO{
 }
 
 export enum NodeType{
-  Label,
+  Label = 0,
 
   String = 1,
   Float = 2,
@@ -33,8 +33,8 @@ export enum NodeType{
   AnyTypeB = 7,
   AnyTypeC = 8,
 
-  OSCAddress,
-  ParameterList
+  OSCAddress = 9,
+  ParameterList = 10
 }
 
 export let NodeIOResolveAnyTypes = ( nodeio: NodeIO ): NodeType | null => {

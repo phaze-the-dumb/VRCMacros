@@ -60,14 +60,17 @@ export let renderNodes = (
   ctx.textBaseline = 'top';
 
   nodes.map(node => {
+    let nodeX = Math.round(node.x / 10) * 10;
+    let nodeY = Math.round(node.y / 10) * 10;
+
     ctx.fillStyle = '#1f2129';
     ctx.strokeStyle = node.selected ? '#004696ff' : '#fff5';
     ctx.lineWidth = 5 * position.scale;
 
     // Draw Node Box
     drawRoundedRect(ctx,
-      (node.x + startX + position.x) * position.scale,
-      (node.y + startY + position.y) * position.scale,
+      (nodeX + startX + position.x) * position.scale,
+      (nodeY + startY + position.y) * position.scale,
       node.w * position.scale,
       node.h * position.scale,
       10 * position.scale);
@@ -81,8 +84,8 @@ export let renderNodes = (
     ctx.textAlign = 'center';
 
     ctx.fillText(node.name,
-      (node.x + (node.w * 0.5) + startX + position.x) * position.scale,
-      (node.y + 10 + startY + position.y) * position.scale
+      (nodeX + (node.w * 0.5) + startX + position.x) * position.scale,
+      (nodeY + 10 + startY + position.y) * position.scale
     );
 
     // Draw Inputs
@@ -92,14 +95,14 @@ export let renderNodes = (
     node.inputs.map(( input, i ) => {
       ctx.fillStyle = NodeIOLinkColours(input);
       ctx.fillRect(
-        (node.x + 10 + startX + position.x) * position.scale,
-        (node.y + 50 + (30 * i) + startY + position.y) * position.scale,
+        (nodeX + 10 + startX + position.x) * position.scale,
+        (nodeY + 50 + (30 * i) + startY + position.y) * position.scale,
         20 * position.scale, 20 * position.scale
       )
 
       ctx.fillText(input.name,
-        (node.x + 35 + startX + position.x) * position.scale,
-        (node.y + 53 + (30 * i) + startY + position.y) * position.scale,
+        (nodeX + 35 + startX + position.x) * position.scale,
+        (nodeY + 53 + (30 * i) + startY + position.y) * position.scale,
       )
     })
 
@@ -109,27 +112,30 @@ export let renderNodes = (
     node.outputs.map(( output, i ) => {
       ctx.fillStyle = NodeIOLinkColours(output);
       ctx.fillRect(
-        (node.x + (node.w - 30) + startX + position.x) * position.scale,
-        (node.y + 50 + (30 * i) + startY + position.y) * position.scale,
+        (nodeX + (node.w - 30) + startX + position.x) * position.scale,
+        (nodeY + 50 + (30 * i) + startY + position.y) * position.scale,
         20 * position.scale, 20 * position.scale
       )
 
       ctx.fillText(output.name,
-        (node.x + (node.w - 35) + startX + position.x) * position.scale,
-        (node.y + 53 + (30 * i) + startY + position.y) * position.scale,
+        (nodeX + (node.w - 35) + startX + position.x) * position.scale,
+        (nodeY + 53 + (30 * i) + startY + position.y) * position.scale,
       )
     })
   })
 
   nodes.map(node => {
+    let nodeX = Math.round(node.x / 10) * 10;
+    let nodeY = Math.round(node.y / 10) * 10;
+
     node.outputs.map(( output, i ) => {
       output.connections.map(partner => {
         ctx.strokeStyle = NodeIOLinkColours(output);
         drawCurve(ctx,
-          (node.x + (node.w - 30) + 10 + startX + position.x) * position.scale,
-          (node.y + 50 + (30 * i) + 10 + startY + position.y) * position.scale,
-          (partner.parent.x + 20 + startX + position.x) * position.scale,
-          (partner.parent.y + 60 + (30 * partner.index) + startY + position.y) * position.scale,
+          (nodeX + (node.w - 30) + 10 + startX + position.x) * position.scale,
+          (nodeY + 50 + (30 * i) + 10 + startY + position.y) * position.scale,
+          ((Math.round(partner.parent.x / 10) * 10) + 20 + startX + position.x) * position.scale,
+          ((Math.round(partner.parent.y / 10) * 10) + 60 + (30 * partner.index) + startY + position.y) * position.scale,
         );
         ctx.stroke();
       })

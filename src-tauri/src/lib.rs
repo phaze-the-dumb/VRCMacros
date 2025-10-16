@@ -35,6 +35,8 @@ pub async fn run() {
     .plugin(tauri_plugin_opener::init())
     .invoke_handler(tauri::generate_handler![
       get_addresses::get_addresses,
+
+      save_graph::save_graph
     ])
     .manage(conf)
     .manage(&ADDRESSES)

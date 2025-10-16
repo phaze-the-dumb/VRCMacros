@@ -239,6 +239,7 @@ let App = () => {
         movingNode.y = movingNode.y - (mouseStartPos[1] - e.clientY) / scale;
 
         mouseStartPos = [ e.clientX, e.clientY ];
+        NodeManager.Instance.UpdateConfig();
       } else{
         offsetTarget = [ offsetTarget[0] - (mouseStartPos[0] - e.clientX) / scale, offsetTarget[1] - (mouseStartPos[1] - e.clientY) / scale ];
         mouseStartPos = [ e.clientX, e.clientY ];
@@ -305,6 +306,8 @@ let App = () => {
             ){
               drawingFrom!.connections.push(input);
               input.connections.push(drawingFrom!);
+
+              NodeManager.Instance.UpdateConfig();
             }
           }
         }
