@@ -2,9 +2,9 @@ use std::sync::{self, Mutex};
 
 use tauri::{ App, Emitter, Manager };
 
-use crate::{ osc };
+use crate::osc::{ self, OSCMessage };
 
-pub fn setup( app: &mut App, addresses: &'static Mutex<Vec<String>> ){
+pub fn setup( app: &mut App, addresses: &'static Mutex<Vec<OSCMessage>> ){
   let window = app.get_webview_window("main").unwrap();
 
   let ( sender, receiver ) = sync::mpsc::channel();
@@ -19,9 +19,9 @@ pub fn setup( app: &mut App, addresses: &'static Mutex<Vec<String>> ){
 
       window.emit("osc-message", &message).unwrap();
 
-      let addr = message.address.clone();
+      let msg = message.clone();
       let mut addresses = addresses.lock().unwrap();
-      if !addresses.contains(&addr){ addresses.push(addr); }
+      if !addresses.contains(&msg){ addresses.push(msg); }
     }
   });
 }

@@ -1,108 +1,21 @@
-@font-face {
-  font-family: Rubik;
-  src: url('/assets/fonts/Rubik-VariableFont_wght.ttf');
-}
-
-* {
-  box-sizing: border-box;
-  -webkit-user-select: none;
-}
-
 body{
-  background: linear-gradient(-45deg,
-    #12141a 0%, #12141a 10%,
-    #22262e 10%, #22262e 20%,
-    #272e44 20%, #272e44 22%,
-    #1f2129 22%
-  );
+  background: #1f2129;
   background-attachment: fixed;
   color: #fff;
   font-family: Rubik, 'Courier New';
   margin: 0;
 }
 
-h1, h2, h3, h4, h5, h6, p{
+* {
+  box-sizing: border-box;
+}
+
+p, h1, h2, h3, h4, h5, h6{
   margin: 0;
-  font-weight: 500;
 }
 
-span{
-  -webkit-user-select: auto;
-}
-
-div[app-carousel]{
+canvas{
   position: fixed;
-  top: 10px;
-  left: 220px;
-  width: calc(100vw - 230px);
-  height: calc(100vh - 20px);
-  overflow: hidden;
-}
-
-div[app-page]{
-  width: calc(100vw - 230px);
-  height: calc(100vh - 20px);
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-div[app-button]{
-  display: inline-block;
-  background: #2a3452;
-  padding: 10px 25px;
-  cursor: pointer;
-  user-select: none;
-  border-radius: 5px;
-  transition: 0.25s;
-  min-width: 100px;
-  text-align: center;
-}
-
-div[app-button]:hover{
-  background: #151a29;
-}
-
-div[app-button-minimal]{
-  display: inline-block;
-  background: #424242;
-  padding: 10px 25px;
-  cursor: pointer;
-  user-select: none;
-  border-radius: 5px;
-  transition: 0.25s;
-  min-width: 100px;
-  text-align: center;
-  opacity: 0.5;
-}
-
-div[app-button-minimal]:hover{
-  background: #525252;
-}
-
-div[app-col]{
-  display: flex;
-}
-
-div[app-col-50]{
-  display: flex;
-}
-
-div[app-col-50] > div{
-  width: 50%;
-}
-
-div[app-icon]{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 30px;
-  height: 30px;
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: pointer;
-  transition: 0.1s;
-}
-
-div[app-icon]:hover{
-  opacity: 0.75;
+  top: 0;
+  left: 0;
 }

@@ -4,8 +4,6 @@ export interface OSCMessage{
 }
 
 export interface OSCValue{
-  Float?: number,
-  Int?: number,
-  Boolean?: boolean,
-  String?: string
+  key: string,
+  value: any
 }

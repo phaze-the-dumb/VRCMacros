@@ -1,0 +1,29 @@
+.control-bar{
+  position: fixed;
+  top: 20px;
+  left: 50px;
+  height: 40px;
+  z-index: 100;
+  width: calc(100vw - 100px);
+  background: #272e44;
+  border-radius: 20px;
+  display: flex;
+  padding: 10px 20px;
+  align-items: center;
+}
+
+.button{
+  padding: 5px 10px;
+  margin: 0 10px;
+  background: #445077;
+  border-radius: 5px;
+  transition: 0.1s;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  width: fit-content;
+}
+
+.button:hover{
+  background: #363f5e;
+}

@@ -4,21 +4,28 @@ use std::{ net::UdpSocket, sync::mpsc::Sender };
 
 use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize)]
-pub enum OSCValue{
-  Int(i32),
-  Float(f32),
-  Boolean(bool),
-  String(String),
-}
+use crate::structs::parameter_types::ParameterType;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct OSCMessage{
   pub address: String,
-  pub values: Vec<OSCValue>
+  pub values: Vec<ParameterType>
 }
 
-// TODO: implement osc bundles
+impl PartialEq for OSCMessage{
+  // Technically this isn't exactly equal, but the only time i'm checking if OSCMessage's are equal
+  // Is when i'm checking for the "address" value
+
+  fn eq(&self, other: &Self) -> bool {
+    self.address == other.address
+  }
+
+  fn ne(&self, other: &Self) -> bool {
+    self.address != other.address
+  }
+}
+
+// TODO: Implement osc bundles
 pub fn start_server( sender: Sender<OSCMessage>, addr: &str ) {
   let socket = UdpSocket::bind(addr).unwrap();
 
@@ -68,7 +75,7 @@ pub fn start_server( sender: Sender<OSCMessage>, addr: &str ) {
           let bytes = <&[u8; 4]>::try_from(val_buf).unwrap().clone();
           let int = i32::from_be_bytes(bytes);
 
-          values.push(OSCValue::Int(int));
+          values.push(ParameterType::Int(int));
           value_start += 4;
         },
         0x66 => {
@@ -77,11 +84,11 @@ pub fn start_server( sender: Sender<OSCMessage>, addr: &str ) {
           let bytes = <&[u8; 4]>::try_from(val_buf).unwrap().clone();
           let float = f32::from_be_bytes(bytes);
 
-          values.push(OSCValue::Float(float));
+          values.push(ParameterType::Float(float));
           value_start += 4;
         },
-        0x54 => values.push(OSCValue::Boolean(true)),
-        0x46 => values.push(OSCValue::Boolean(false)),
+        0x54 => values.push(ParameterType::Boolean(true)),
+        0x46 => values.push(ParameterType::Boolean(false)),
         _ => {}
       }
     }
@@ -95,7 +102,7 @@ pub fn start_server( sender: Sender<OSCMessage>, addr: &str ) {
   }
 }
 
-pub fn send_message( address: &str, values: Vec<OSCValue>, ip_addr: &str ){
+pub fn send_message( address: &str, values: Vec<ParameterType>, ip_addr: &str ){
   let socket = UdpSocket::bind("127.0.0.1:0").unwrap();
   let mut buf: Vec<u8> = Vec::new();
 
@@ -113,10 +120,11 @@ pub fn send_message( address: &str, values: Vec<OSCValue>, ip_addr: &str ){
   let mut value_count = 1;
   for value in values.clone() {
     match value {
-      OSCValue::Boolean( val ) => buf.push(if val { 0x54 } else { 0x46 }),
-      OSCValue::Float(_) => buf.push(0x66),
-      OSCValue::Int(_) => buf.push(0x69),
-      OSCValue::String(_) => buf.push(0x73)
+      ParameterType::Boolean( val ) => buf.push(if val { 0x54 } else { 0x46 }),
+      ParameterType::Float(_) => buf.push(0x66),
+      ParameterType::Int(_) => buf.push(0x69),
+      ParameterType::String(_) => buf.push(0x73),
+      _ => {}
     };
 
     value_count += 1;
@@ -128,9 +136,9 @@ pub fn send_message( address: &str, values: Vec<OSCValue>, ip_addr: &str ){
 
   for value in values{
     match value{
-      OSCValue::Float( val ) => buf.append(&mut val.to_be_bytes().to_vec()),
-      OSCValue::Int( val ) => buf.append(&mut val.to_be_bytes().to_vec()),
-      OSCValue::String( val ) => {
+      ParameterType::Float( val ) => buf.append(&mut val.to_be_bytes().to_vec()),
+      ParameterType::Int( val ) => buf.append(&mut val.to_be_bytes().to_vec()),
+      ParameterType::String( val ) => {
         let mut str_buf = val.as_bytes().to_vec();
         let buf_len = str_buf.len().clone();
 

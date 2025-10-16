@@ -2,7 +2,7 @@ use std::{ fs, sync::Mutex };
 
 use frontend_calls::*;
 
-use crate::{ setup::setup, utils::config::Config };
+use crate::{ osc::OSCMessage, setup::setup, utils::config::Config };
 
 mod frontend_calls;
 mod structs;
@@ -29,22 +29,12 @@ pub async fn run() {
   let conf_file = container_folder.join("conf");
   let conf = Config::new(conf_file);
 
-  static ADDRESSES: Mutex<Vec<String>> = Mutex::new(Vec::new());
+  static ADDRESSES: Mutex<Vec<OSCMessage>> = Mutex::new(Vec::new());
 
   tauri::Builder::default()
     .plugin(tauri_plugin_opener::init())
     .invoke_handler(tauri::generate_handler![
       get_addresses::get_addresses,
-      get_actions::get_actions,
-      get_actions::get_action,
-
-      triggers::new_trigger,
-      triggers::rm_trigger,
-      triggers::add_trigger_action,
-      triggers::rm_trigger_action,
-      triggers::set_trigger_action_type,
-      triggers::set_trigger_address,
-      triggers::list_triggers,
     ])
     .manage(conf)
     .manage(&ADDRESSES)

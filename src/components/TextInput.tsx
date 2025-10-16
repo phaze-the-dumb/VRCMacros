@@ -83,7 +83,10 @@ export let TextInput = ( props: TextInputProps ) => {
           onChange={() => props.change ? props.change(input.value) : null}
           onInput={onInput}
           onKeyDown={onKeyDown}
-          onFocusOut={() => setSuggestionsOpen(false)}
+          onFocusOut={() => setTimeout(() => {
+            setSuggestionsOpen(false);
+            suggestionsIndex = -1;
+          }, 100)}
           ref={input} />
 
         <Show when={suggestionsOpen()}>
@@ -94,6 +97,9 @@ export let TextInput = ( props: TextInputProps ) => {
 
                 input.value = thisEl.innerHTML;
                 setSuggestionsOpen(false);
+
+                props.change ? props.change(input.value) : null
+                suggestionsIndex = -1;
               }}>{ item }</div> }
             </For>
           </div>
