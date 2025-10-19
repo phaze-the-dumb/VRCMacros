@@ -1,6 +1,6 @@
 import { PositionInfo } from "../renderer";
 
-export let screenToWorldSpace = ( canvas: HTMLCanvasElement, position: PositionInfo, pointX: number, pointY: number ) => {
+export let screenToWorldSpace = ( canvas: HTMLCanvasElement, position: PositionInfo, pointX: number, pointY: number ): [ number, number ] => {
   let startX = canvas.width / -2;
   let startY = canvas.height / -2;
 

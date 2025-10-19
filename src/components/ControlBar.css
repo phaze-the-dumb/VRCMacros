@@ -1,10 +1,10 @@
 .control-bar{
   position: fixed;
   top: 20px;
-  left: 50px;
+  left: 20px;
   height: 40px;
   z-index: 100;
-  width: calc(100vw - 100px);
+  width: calc(100vw - 40px);
   background: #272e44;
   border-radius: 20px;
   display: flex;

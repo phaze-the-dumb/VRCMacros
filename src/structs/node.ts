@@ -1,15 +1,52 @@
-export interface Node{
-  name: string,
-  id: number,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  inputs: NodeIO[],
-  outputs: NodeIO[],
-  selected: boolean,
-  statics: NodeStatic[],
-  onStaticsUpdate: ( node: Node ) => void
+import { NodeDefinition } from "../Nodes/Nodes";
+
+export class Node{
+  name: string;
+  id: string;
+  typeId: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  inputs: NodeIO[];
+  outputs: NodeIO[];
+  selected: boolean;
+  statics: NodeStatic[];
+  onStaticsUpdate: ( node: Node ) => void;
+
+  constructor( pos: [ number, number ], node: NodeDefinition, id: string ){
+    this.name = node.name;
+    this.id = id;
+    this.typeId = node.typeId!;
+    this.x = pos[0];
+    this.y = pos[1];
+    this.w = node.w!;
+    this.h = node.h!;
+
+    this.inputs = node.inputs ? node.inputs.map(( x, indx ) => {
+      return {
+        name: x.name,
+        type: x.type,
+        connections: [],
+        parent: this,
+        index: indx
+      }
+    }) : [];
+
+    this.outputs = node.outputs ? node.outputs.map(( x, indx ) => {
+      return {
+        name: x.name,
+        type: x.type,
+        connections: [],
+        parent: this,
+        index: indx
+      }
+    }) : [];
+
+    this.selected = false;
+    this.statics = node.statics!,
+    this.onStaticsUpdate = node.onStaticsUpdate!;
+  }
 }
 
 export interface NodeIO{

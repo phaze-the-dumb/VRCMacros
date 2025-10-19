@@ -233,6 +233,26 @@ let drawCurve = ( ctx: CanvasRenderingContext2D, fromX: number, fromY: number, t
   ctx.bezierCurveTo(midpoint[0], midpoint[1], end[0], end[1], toX, toY);
 }
 
+export let renderNullTab = (
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+) => {
+  ctx.fillStyle = '#fff';
+
+  ctx.font = '20px Arial';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+
+  let textX = lerp((canvas.width / -2) + 200, canvas.width / 2, 0.5);
+  let textY = lerp((canvas.height / -2) + 40, canvas.height / 2, 0.5);
+
+  ctx.font = '40px Arial';
+  ctx.fillText('Welcome to VRCMacros', textX, textY);
+
+  ctx.font = '20px Arial';
+  ctx.fillText('Create a new tab to get started!', textX, textY + 40);
+}
+
 let drawRoundedRect = ( ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, radius: number ) => {
   ctx.beginPath();
   ctx.arc(x + radius, y + radius, radius, Math.PI, Math.PI * 1.5);
