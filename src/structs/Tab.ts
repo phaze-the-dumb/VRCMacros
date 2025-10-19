@@ -5,6 +5,10 @@ export interface Tab{
   name: string,
   id: string,
   nodes: Node[],
+
   selected: Accessor<boolean>,
   setSelected: Setter<boolean>
+
+  needsSave: Accessor<boolean>,
+  setNeedsSave: Setter<boolean>
 }

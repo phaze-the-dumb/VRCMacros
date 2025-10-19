@@ -1,4 +1,4 @@
-import { createSignal, For, onMount } from 'solid-js';
+import { createSignal, For, onMount, Show } from 'solid-js';
 import './TabMenu.css';
 import { NodeManager } from '../Mangers/NodeManager';
 import { Tab } from '../structs/Tab';
@@ -21,13 +21,22 @@ export let TabMenu = () => {
       <For each={Object.values(tabs())}>
         {
           tab =>
-          <div class={ tab.selected() ? 'tab-selected ' : 'tab' }>
-            <div class="tab-icon" onClick={() => {
-              NodeManager.Instance.SelectTab(tab.id);
-            }}><img src="/assets/icons/pen-to-square-regular-full.svg" width="15" /></div>
-            <div class="tab-meta" onClick={() => {
-              NodeManager.Instance.SelectTab(tab.id);
-            }} onDblClick={( e ) => {
+          <div class={ tab.selected() ? 'tab-selected ' : 'tab' } onClick={() => {
+            NodeManager.Instance.SelectTab(tab.id);
+          }}>
+            <div class="tab-icon" onClick={async () => {
+              if(tab.selected()){
+                NodeManager.Instance.SaveTab(tab);
+              }
+            }}>
+              <Show when={tab.selected() && tab.needsSave()} fallback={
+                <img src="/assets/icons/pen-to-square-regular-full.svg" width="15" />
+              }>
+                <img src="/assets/icons/floppy-disk-solid-full.svg" width="15" />
+              </Show>
+
+            </div>
+            <div class="tab-meta" onDblClick={( e ) => {
               let input = <input class="tab-meta-input" value={ e.target.innerHTML } /> as HTMLInputElement;
 
               e.target.innerHTML = '';
@@ -40,7 +49,9 @@ export let TabMenu = () => {
               }
             }}>{ tab.name }</div>
             <div class="tab-close" onClick={() => {
-              NodeManager.Instance.CloseTab(tab.id);
+              setTimeout(() => {
+                NodeManager.Instance.CloseTab(tab.id);
+              }, 50)
             }}><img src="/assets/icons/xmark-solid-full.svg" width="12" /></div>
           </div>
         }
@@ -54,7 +65,7 @@ export let TabMenu = () => {
 
           window.addEventListener('click', closeTabImportMenu);
         }}>
-        <div class="tab-new-dropdown" style={{ opacity: tabImportOpen() ? 1 : 0 }}>
+        <div class="tab-new-dropdown" style={{ display: tabImportOpen() ? 'block' : 'none' }}>
           <div class="tab">Import from file</div>
           <div class="tab">Import from URL</div>
         </div>

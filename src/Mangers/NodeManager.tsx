@@ -5,6 +5,7 @@ import { createSignal } from "solid-js";
 import { listen } from "@tauri-apps/api/event";
 import { getVersion } from "@tauri-apps/api/app";
 import { NodesByID } from "../Nodes/Nodes";
+import { save } from "@tauri-apps/plugin-dialog";
 
 export interface TabHashMap {
   [details: string] : Tab;
@@ -17,15 +18,9 @@ export class NodeManager{
   private _tabs: TabHashMap = {};
 
   private _nodes: Node[] = [];
-  private _needsSave = false;
 
   constructor(){
     NodeManager.Instance = this;
-
-    setInterval(() => {
-      // Save config every 1 second
-      if(this._needsSave)this._saveConfigToDisk();
-    }, 1_000);
 
     listen('load_new_tab', ( ev: any ) => {
       this._loadFromConfig(ev.payload);
@@ -38,13 +33,18 @@ export class NodeManager{
 
   public async AddTab( name: string ){
     let [ selected, setSelected ] = createSignal(false);
+    let [ needsSave, setNeedsSave ] = createSignal(false);
 
     let tab: Tab = {
       name: name,
       id: await NodeManager.Instance.GetNewNodeId(),
       nodes: [],
-      selected: selected,
-      setSelected: setSelected
+
+      selected,
+      setSelected,
+
+      needsSave,
+      setNeedsSave
     };
 
     this._tabs[tab.id] = tab;
@@ -110,6 +110,15 @@ export class NodeManager{
     }
   }
 
+  public async SaveTab( tab: Tab ){
+    let path = await save({ defaultPath: tab.name + '.macro', filters: [ { name: 'Macro Files', extensions: [ 'macro' ] } ] });
+
+    console.log(path);
+
+    // TODO: Add location metadata to tab interface so it knows where to save
+    // TODO: store file
+  }
+
   public HookTabUpdate( cb: ( tabs: TabHashMap ) => void ){
     this._tabUpdateHook = cb;
   }
@@ -150,7 +159,11 @@ export class NodeManager{
 
 
   public UpdateConfig(){
-    this._needsSave = true;
+    if(!this._selectedTab)return;
+    let tab = this._tabs[this._selectedTab];
+    if(!tab)return;
+
+    tab.setNeedsSave(true);
   }
 
   private async _loadFromConfig( config: string ){
@@ -215,7 +228,6 @@ export class NodeManager{
   }
 
   private async _saveConfigToDisk(){
-    this._needsSave = false;
     // Convert it into a structure we can actually save...
 
     if(!this._selectedTab)return;
