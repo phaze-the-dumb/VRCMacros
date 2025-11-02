@@ -1,6 +1,7 @@
 import { Node, NodeStatic, NodeType } from "../structs/node";
 
 import { NodeConditional } from "./Conditional";
+import { NodeDebug } from "./Debug";
 import { NodeOSCActions } from "./OSCActions";
 import { NodeOSCTrigger } from "./OSCTrigger";
 import { NodeStatics } from "./Statics";
@@ -9,7 +10,7 @@ export interface NodeDefinition{
   isSingle: boolean,
   name: string,
   typeId?: string,
-  onStaticsUpdate?: ( node: Node ) => void,
+  onStaticsUpdate?: ( node: Node ) => Promise<void>,
   // build?: ( pos: [ number, number ], onStaticsUpdate: ( node: Node ) => void ) => Promise<Node>,
   w?: number,
   h?: number,
@@ -28,7 +29,8 @@ export let Nodes: NodeDefinition[] = [
   NodeOSCTrigger,
   NodeConditional,
   NodeStatics,
-  NodeOSCActions
+  NodeOSCActions,
+  NodeDebug
 ]
 
 export let NodesByID: NodeDefinitionHashMap = {}

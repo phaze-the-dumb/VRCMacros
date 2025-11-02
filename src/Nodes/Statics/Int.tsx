@@ -17,5 +17,5 @@ export let NodeStaticsInt: NodeDefinition = {
 
   outputs: [{ name: "Int", type: NodeType.Int }],
 
-  onStaticsUpdate: ( _node: Node ) => {}
+  onStaticsUpdate: async ( _node: Node ) => {}
 }

@@ -20,5 +20,5 @@ export let NodeOSCActionsSendChatbox: NodeDefinition = {
     { name: "Value", type: NodeType.String }
   ],
 
-  onStaticsUpdate: ( _node: Node ) => {}
+  onStaticsUpdate: async ( _node: Node ) => {}
 }

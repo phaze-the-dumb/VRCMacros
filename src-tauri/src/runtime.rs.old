@@ -1,0 +1,97 @@
+use std::collections::HashMap;
+
+use anyhow::bail;
+
+use crate::{ osc::OSCMessage, structs::{ nodes::{ Node, Tab }, parameter_types::ParameterType } };
+
+pub fn start_runtime(
+  tab: &Tab,
+  msg: &OSCMessage,
+  node_execution_table:
+    &HashMap<String, Box<dyn Fn(&Node, &OSCMessage, Vec<ParameterType>) -> Vec<ParameterType>>>
+) -> anyhow::Result<()>{
+  for i in 0..tab.nodes.len(){
+    let node = &tab.nodes[i];
+
+    if node.type_id == "osctrigger"{
+      runtime(&tab.nodes, i, msg, node_execution_table)?;
+    }
+  }
+
+  Ok(())
+}
+
+fn runtime(
+  nodes: &Vec<Node>,
+  index: usize,
+  msg: &OSCMessage,
+  node_execution_table:
+    &HashMap<String, Box<dyn Fn(&Node, &OSCMessage, Vec<ParameterType>) -> Vec<ParameterType>>>
+) -> anyhow::Result<()>{
+  let node = &nodes[index];
+
+  let execute_node = node_execution_table.get(&node.type_id);
+  if execute_node.is_none(){ bail!("Cannot find node in execution table."); }
+
+  let res = execute_node.unwrap()(node, msg, vec![]);
+  if res.len() == 0{ return Ok(()); }
+
+  let nodes_length = (&nodes).len();
+
+  for i in 0..res.len(){
+    let output = &node.outputs[i];
+    if output.value_type == 5 { // 5 - Flow Type
+
+      if let ParameterType::Flow(run) = res[i]{
+
+        if run{
+          let connections = &output.connections;
+          for connection in connections{
+            let mut found_node = None;
+
+            for i in 0..nodes_length{
+              let node = &nodes[i];
+
+              if node.id == connection.node{
+                found_node = Some(i);
+                break;
+              }
+            }
+
+            if found_node.is_some(){
+              runtime(nodes, found_node.unwrap(), msg, node_execution_table)?;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Ok(())
+}
+
+pub fn load_excecution_table(
+  node_execution_table:
+    &mut HashMap<String, Box<dyn Fn(&Node, &OSCMessage, Vec<ParameterType>) -> Vec<ParameterType>>>
+){
+  node_execution_table.insert("osctrigger".into(), Box::new(| node, msg, _ |{
+    if node.statics[0].value.is_null(){ return vec![ ParameterType::Flow(false) ] }
+
+    let node_addr = node.statics[0].value.as_str().unwrap().to_owned();
+    if node_addr == msg.address{
+      let mut dat = vec![
+        ParameterType::Flow(true)
+      ];
+
+      dat.extend(msg.values.clone());
+      dat
+    } else{
+      vec![ ParameterType::Flow(false) ]
+    }
+  }));
+
+  node_execution_table.insert("debug".into(), Box::new(| _, _, args |{
+    dbg!(&args[1]);
+    vec![]
+  }));
+}

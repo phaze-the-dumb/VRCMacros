@@ -25,5 +25,5 @@ export let NodeConditionalIfTrue: NodeDefinition = {
     { name: "Not True", type: NodeType.Flow },
   ],
 
-  onStaticsUpdate: (_node: Node) => { }
+  onStaticsUpdate: async ( _node: Node ) => { }
 }

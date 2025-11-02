@@ -17,5 +17,5 @@ export let NodeStaticsString: NodeDefinition = {
 
   outputs: [{ name: "String", type: NodeType.String }],
 
-  onStaticsUpdate: ( _node: Node ) => {}
+  onStaticsUpdate: async ( _node: Node ) => {}
 }

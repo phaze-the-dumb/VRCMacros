@@ -6,6 +6,7 @@ import { listen } from "@tauri-apps/api/event";
 import { getVersion } from "@tauri-apps/api/app";
 import { NodesByID } from "../Nodes/Nodes";
 import { save } from "@tauri-apps/plugin-dialog";
+import { ConfirmationManager } from "./ConfirmationManager";
 
 export interface TabHashMap {
   [details: string] : Tab;
@@ -23,7 +24,7 @@ export class NodeManager{
     NodeManager.Instance = this;
 
     listen('load_new_tab', ( ev: any ) => {
-      this._loadFromConfig(ev.payload);
+      this._loadFromConfig(ev.payload.path, ev.payload.graph);
     })
   }
 
@@ -31,7 +32,7 @@ export class NodeManager{
   private _tabUpdateHook: ( tabs: TabHashMap ) => void = () => {};
   private _tabChangeHook: () => void = () => {};
 
-  public async AddTab( name: string ){
+  public async AddTab( name: string ): Promise<Tab>{
     let [ selected, setSelected ] = createSignal(false);
     let [ needsSave, setNeedsSave ] = createSignal(false);
 
@@ -39,42 +40,74 @@ export class NodeManager{
       name: name,
       id: await NodeManager.Instance.GetNewNodeId(),
       nodes: [],
+      saveLocation: null,
 
       selected,
       setSelected,
 
       needsSave,
-      setNeedsSave
+      setNeedsSave,
+
+      refuseSync: false
     };
 
     this._tabs[tab.id] = tab;
 
     this.SelectTab(tab.id);
     this._tabUpdateHook(this._tabs);
+
+    return tab;
   }
 
-  public CloseTab( id: string ){ // TODO: Add confirmation to close tab
-    console.log(id === this._selectedTab);
-    if(this._selectedTab === id){
-      let tabs = Object.values(this._tabs);
+  public CloseTab( id: string ){
+    let tab = this._tabs[id];
 
-      if(tabs.length === 1){
-        this.SelectTab(null);
-      } else{
-        let tabToDelete = this._tabs[id];
+    let closeCB = () => {
+      if(this._selectedTab === id){
+        let tabs = Object.values(this._tabs);
 
-        let index = tabs.indexOf(tabToDelete);
-        let nextTab = tabs[index + 1];
+        if(tabs.length === 1){
+          this.SelectTab(null);
+        } else{
+          let index = tabs.indexOf(tab);
+          let nextTab = tabs[index + 1];
 
-        if(nextTab)
-          this.SelectTab(nextTab.id);
-        else
-          this.SelectTab(tabs[0].id);
+          if(nextTab)
+            this.SelectTab(nextTab.id);
+          else
+            this.SelectTab(tabs[0].id);
+        }
       }
+
+      invoke('discard_tab', { id: id });
+
+      delete this._tabs[id];
+      this._tabUpdateHook(this._tabs);
     }
 
-    delete this._tabs[id];
-    this._tabUpdateHook(this._tabs);
+    if(tab.needsSave()){
+      ConfirmationManager.Instance.ShowConfirmation(
+        'Discard Changes?',
+        'If you close this tab without saving you will lose all changes.',
+        [
+          {
+            text: 'Save',
+            callback: async () => {
+              await this.SaveTab(tab);
+              closeCB();
+            }
+          },
+          {
+            text: 'Don\'t Save',
+            callback: () => {
+              closeCB();
+            }
+          }
+        ]
+      )
+    } else{
+      closeCB();
+    }
   }
 
   public RenameTab( id: string, name: string ){
@@ -111,12 +144,16 @@ export class NodeManager{
   }
 
   public async SaveTab( tab: Tab ){
-    let path = await save({ defaultPath: tab.name + '.macro', filters: [ { name: 'Macro Files', extensions: [ 'macro' ] } ] });
+    let path =
+      tab.saveLocation ||
+      await save({ defaultPath: tab.name + '.macro', filters: [ { name: 'Macro Files', extensions: [ 'macro' ] } ] });
 
-    console.log(path);
+    if(!path)return;
 
-    // TODO: Add location metadata to tab interface so it knows where to save
-    // TODO: store file
+    tab.saveLocation = path;
+    tab.setNeedsSave(false);
+
+    this._saveConfigToDisk(path, tab.id);
   }
 
   public HookTabUpdate( cb: ( tabs: TabHashMap ) => void ){
@@ -163,10 +200,13 @@ export class NodeManager{
     let tab = this._tabs[this._selectedTab];
     if(!tab)return;
 
+    if(tab.refuseSync)return;
+    invoke('sync_tab', { graph: this._generateTabGraph(tab.id)[0], id: tab.id });
+
     tab.setNeedsSave(true);
   }
 
-  private async _loadFromConfig( config: string ){
+  private async _loadFromConfig( path: string, config: string ){
     let json = JSON.parse(config);
 
     if(
@@ -175,7 +215,10 @@ export class NodeManager{
       !json.graph
     )return;
 
-    await this.AddTab(json.tab_name);
+    let tab = await this.AddTab(json.tab_name);
+    tab.refuseSync = true;
+    tab.saveLocation = path;
+
     this._nodes = [];
 
     let graph = json.graph;
@@ -187,7 +230,7 @@ export class NodeManager{
       let nod = new Node(node.pos, NodesByID[node.typeId], node.id);
 
       nod.statics = node.statics;
-      nod.onStaticsUpdate(nod);
+      await nod.onStaticsUpdate(nod);
 
       this._nodes.push(nod);
     }
@@ -225,19 +268,25 @@ export class NodeManager{
         }
       }
     }
+
+    tab.setNeedsSave(false);
+    tab.nodes = this._nodes;
+
+    tab.refuseSync = false;
+    this.UpdateConfig();
   }
 
-  private async _saveConfigToDisk(){
+  private _generateTabGraph( tabId: string | null ): [ any, Tab | null ]{
     // Convert it into a structure we can actually save...
 
-    if(!this._selectedTab)return;
-    let tab = this._tabs[this._selectedTab];
-    if(!tab)return;
+    if(!tabId)return [ null, null ];
+    let tab = this._tabs[tabId];
+    if(!tab)return [ null, null ];
 
     let nodesToSave = [];
 
-    for (let i = 0; i < this._nodes.length; i++) {
-      let node = this._nodes[i];
+    for (let i = 0; i < tab.nodes.length; i++) {
+      let node = tab.nodes[i];
 
       let nodeOutputs = [];
 
@@ -266,10 +315,17 @@ export class NodeManager{
       })
     }
 
-    invoke('save_graph', { tabName: tab.name, graph: JSON.stringify({
+    return [ nodesToSave, tab ];
+  }
+
+  private async _saveConfigToDisk( path: string, tabId: string | null ){
+    let [ nodesToSave, tab ] = this._generateTabGraph(tabId);
+    if(!tab)return;
+
+    invoke('save_graph', { graph: JSON.stringify({
       tab_name: tab.name,
       version: await getVersion(),
       graph: nodesToSave
-    }) });
+    }), path });
   }
 }

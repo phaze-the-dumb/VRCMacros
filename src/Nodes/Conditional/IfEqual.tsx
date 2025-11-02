@@ -26,5 +26,5 @@ export let NodeConditionalIfEqual: NodeDefinition = {
     { name: "Not Equal", type: NodeType.Flow },
   ],
 
-  onStaticsUpdate: ( _node: Node ) => {}
+  onStaticsUpdate: async ( _node: Node ) => {}
 }

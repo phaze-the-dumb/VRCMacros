@@ -1,0 +1,42 @@
+.confirmation-blackout{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 150;
+  background: #000A;
+}
+
+.confirmation-popup{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #272e44;
+  border-radius: 20px;
+  padding: 10px 20px;
+  text-align: center;
+}
+
+.confirmation-buttons{
+  display: flex;
+  margin-top: 30px;
+}
+
+.confirmation-button{
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+
+  width: 100%;
+  padding: 2px 10px;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  transition: 0.1s;
+  margin: 0 5px;
+}
+
+.confirmation-button:hover{
+  background: #fff2;
+}

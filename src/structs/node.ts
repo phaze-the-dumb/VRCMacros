@@ -12,7 +12,7 @@ export class Node{
   outputs: NodeIO[];
   selected: boolean;
   statics: NodeStatic[];
-  onStaticsUpdate: ( node: Node ) => void;
+  onStaticsUpdate: ( node: Node ) => Promise<void>;
 
   constructor( pos: [ number, number ], node: NodeDefinition, id: string ){
     this.name = node.name;

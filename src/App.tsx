@@ -10,10 +10,13 @@ import { NodeContextMenu } from "./ContextMenu/Node";
 import { ContextMenu } from "./structs/ContextMenu";
 import { NodeManager } from "./Mangers/NodeManager";
 import { TabMenu } from "./components/TabMenu";
+import { ConfirmationPopup } from "./components/ConfirmationPopup";
 
 let App = () => {
   // TODO: Delete selected node when delete key is pressed
+  // TODO: Keybind system
   // TODO: Add undo / redo -ing
+
   let [ selectedNode, setSelectedNode ] = createSignal<Node | null>(null);
 
   let canvas!: HTMLCanvasElement;
@@ -358,6 +361,7 @@ let App = () => {
 
   return (
     <>
+      <ConfirmationPopup />
       <TabMenu />
       <ControlBar node={selectedNode} lockMovement={( lock ) => lockMovement = lock} />
       <canvas ref={canvas}/>
