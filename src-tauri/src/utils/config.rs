@@ -8,7 +8,7 @@ use crate::structs::nodes::Node;
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ConfigValues{
   #[serde(default)]
-  pub loaded_tabs: HashMap<String, Vec<Node>>
+  pub loaded_tabs: HashMap<String, ( Vec<Node>, String, Option<String> )>
 }
 
 pub struct Config {

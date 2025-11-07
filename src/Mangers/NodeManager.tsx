@@ -31,13 +31,13 @@ export class NodeManager{
     invoke('load_previous_tabs').then(async ( tabs: any ) => {
       let version = await getVersion();
 
-      for(let tab of Object.entries(tabs)){
+      for(let tab of Object.entries<any>(tabs)){
         console.log(tab);
 
-        await this._loadFromConfig(null, tab[0], JSON.stringify({
-          tab_name: 'test',
+        await this._loadFromConfig(tab[1][2], tab[0], JSON.stringify({
+          tab_name: tab[1][1],
           version,
-          graph: tab[1]
+          graph: tab[1][0]
         }));
       };
     });
@@ -45,9 +45,7 @@ export class NodeManager{
     (async () => {
       let window = await getCurrentWindow();
 
-      window.onCloseRequested(async ev => {
-        ev.preventDefault();
-
+      window.onCloseRequested(async _ => {
         let tabs = Object.values(this._tabs);
         let tabsNeedingSaving = tabs.filter(x => x.needsSave());
 
@@ -72,8 +70,6 @@ export class NodeManager{
             )
           });
         }
-
-        window.close();
       });
     })();
   }
@@ -198,7 +194,7 @@ export class NodeManager{
       tab.saveLocation ||
       await save({ defaultPath: tab.name + '.macro', filters: [ { name: 'Macro Files', extensions: [ 'macro' ] } ] });
 
-    if(!path)return;
+    if(!path)throw new Error("Cannot save");
 
     tab.saveLocation = path;
     tab.setNeedsSave(false);
@@ -251,7 +247,7 @@ export class NodeManager{
     if(!tab)return;
 
     if(tab.refuseSync)return;
-    invoke('sync_tab', { graph: this._generateTabGraph(tab.id)[0], id: tab.id });
+    invoke('sync_tab', { graph: this._generateTabGraph(tab.id)[0], id: tab.id, name: tab.name, location: tab.saveLocation });
 
     if(needsSave)tab.setNeedsSave(true);
   }
