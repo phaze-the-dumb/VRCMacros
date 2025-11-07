@@ -1,7 +1,6 @@
 use std::{ fs, sync::Mutex };
-use crossbeam_channel::bounded;
-use tokio::sync;
 
+use crossbeam_channel::bounded;
 use frontend_calls::*;
 
 use crate::{ osc::OSCMessage, setup::setup, utils::config::Config };
@@ -16,6 +15,9 @@ mod runtime;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[tokio::main]
 pub async fn run() {
+  // TODO: Impl background running by default
+  // TODO: Auto loading last loaded tabs
+
   let container_folder = dirs::config_dir().unwrap().join("VRCMacros");
 
   match fs::metadata(&container_folder) {

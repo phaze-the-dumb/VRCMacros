@@ -195,7 +195,7 @@ export class NodeManager{
   }
 
 
-  public UpdateConfig(){
+  public UpdateConfig( needsSave = true ){
     if(!this._selectedTab)return;
     let tab = this._tabs[this._selectedTab];
     if(!tab)return;
@@ -203,7 +203,7 @@ export class NodeManager{
     if(tab.refuseSync)return;
     invoke('sync_tab', { graph: this._generateTabGraph(tab.id)[0], id: tab.id });
 
-    tab.setNeedsSave(true);
+    if(needsSave)tab.setNeedsSave(true);
   }
 
   private async _loadFromConfig( path: string, config: string ){
@@ -273,7 +273,7 @@ export class NodeManager{
     tab.nodes = this._nodes;
 
     tab.refuseSync = false;
-    this.UpdateConfig();
+    this.UpdateConfig(false);
   }
 
   private _generateTabGraph( tabId: string | null ): [ any, Tab | null ]{
