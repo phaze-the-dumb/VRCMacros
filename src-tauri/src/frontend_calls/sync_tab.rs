@@ -9,10 +9,7 @@ pub fn sync_tab( graph: Vec<Node>, id: String, name: String, location: Option<St
   cmd.send(RuntimeCommand::AddTab(graph.clone(), id.clone())).unwrap();
 
   let mut config = conf.store.lock().unwrap();
-  config.loaded_tabs.insert(id, ( graph, name, location ));
-  drop(config);
-
-  conf.save();
+  config.loaded_tabs.insert(id, ( graph, name, location )); // TODO: When loading a tab into config, store the save state of it too
 }
 
 #[tauri::command]

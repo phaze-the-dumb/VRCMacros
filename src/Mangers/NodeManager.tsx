@@ -42,36 +42,36 @@ export class NodeManager{
       };
     });
 
-    (async () => {
-      let window = await getCurrentWindow();
+    listen('prompt_to_close', async _ => {
+      let tabs = Object.values(this._tabs);
+      let tabsNeedingSaving = tabs.filter(x => x.needsSave());
 
-      window.onCloseRequested(async _ => {
-        let tabs = Object.values(this._tabs);
-        let tabsNeedingSaving = tabs.filter(x => x.needsSave());
-
-        for(let tab of tabsNeedingSaving){
-          await new Promise<void>(res => {
-            ConfirmationManager.Instance.ShowConfirmation(
-              `Discard Changes in ${tab.name}?`,
-              'If you close this tab without saving you will lose all changes.',
-              [
-                {
-                  text: 'Save',
-                  callback: async () => {
-                    await this.SaveTab(tab);
-                    res();
-                  }
-                },
-                {
-                  text: 'Don\'t Save',
-                  callback: () => { res(); }
+      for(let tab of tabsNeedingSaving){
+        await new Promise<void>(res => {
+          ConfirmationManager.Instance.ShowConfirmation(
+            `Discard Changes in ${tab.name}?`,
+            'If you close this tab without saving you will lose all changes.',
+            [
+              {
+                text: 'Save',
+                callback: async () => {
+                  await this.SaveTab(tab);
+                  res();
                 }
-              ]
-            )
-          });
-        }
-      });
-    })();
+              },
+              {
+                text: 'Don\'t Save',
+                callback: async () => {
+                  res();
+                }
+              }
+            ]
+          )
+        });
+      }
+
+      invoke('close_app');
+    });
   }
 
 
@@ -319,7 +319,7 @@ export class NodeManager{
     tab.nodes = this._nodes;
 
     tab.refuseSync = false;
-    this.UpdateConfig(false);
+    if(!id)this.UpdateConfig(false);
   }
 
   private _generateTabGraph( tabId: string | null ): [ any, Tab | null ]{

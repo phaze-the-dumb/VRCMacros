@@ -8,7 +8,10 @@ use crate::structs::nodes::Node;
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ConfigValues{
   #[serde(default)]
-  pub loaded_tabs: HashMap<String, ( Vec<Node>, String, Option<String> )>
+  pub loaded_tabs: HashMap<String, ( Vec<Node>, String, Option<String> )>,
+
+  #[serde(default)]
+  pub hide_editor_on_start: bool
 }
 
 pub struct Config {
@@ -29,6 +32,8 @@ impl Config {
     };
 
     let json: ConfigValues = serde_json::from_str(&json_string).unwrap();
+
+    dbg!(&json);
 
     Config {
       store: Mutex::new(json),

@@ -15,8 +15,6 @@ mod runtime;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[tokio::main]
 pub async fn run() {
-  // TODO: Impl background running by default
-
   let container_folder = dirs::config_dir().unwrap().join("VRCMacros");
 
   match fs::metadata(&container_folder) {
@@ -45,7 +43,11 @@ pub async fn run() {
       save_graph::save_graph,
       sync_tab::sync_tab,
       sync_tab::discard_tab,
-      load_previous_tabs::load_previous_tabs
+      load_previous_tabs::load_previous_tabs,
+      close_app::close_app,
+
+      settings::set_hide_editor_on_app_start,
+      settings::get_hide_editor_on_app_start,
     ])
     .manage(conf)
     .manage(&ADDRESSES)

@@ -318,7 +318,7 @@ let App = () => {
     requestAnimationFrame(update);
   });
 
-  let update = () => {
+  let update = () => { // TODO: Start/Stop render when app is minimised
     if(stopRender)return;
 
     scale = lerp(scale, targetScale, 0.25);

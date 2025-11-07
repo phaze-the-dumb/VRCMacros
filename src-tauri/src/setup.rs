@@ -3,16 +3,32 @@ use crossbeam_channel::{ Receiver, bounded };
 
 use flate2::read::GzDecoder;
 use serde_json::{ Map, Value };
-use tauri::{ App, Emitter, Listener, Manager, State };
+use tauri::{ App, Emitter, Listener, Manager, WindowEvent };
 
-use crate::{ osc::{ self, OSCMessage }, runtime::{ commands::RuntimeCommand, nodes::RuntimeNodeTree, runtime, runtime_dry }, structs::parameter_types::ParameterType, utils::config::Config };
+use crate::{ osc::{ self, OSCMessage }, runtime::{ commands::RuntimeCommand, nodes::RuntimeNodeTree, runtime, runtime_dry }, structs::parameter_types::ParameterType, utils::setup_traymenu::setup_traymenu };
 
 pub fn setup(
   app: &mut App,
   addresses: &'static Mutex<Vec<OSCMessage>>,
-  mut runtime_command_receiver: Receiver<RuntimeCommand>
+  runtime_command_receiver: Receiver<RuntimeCommand>
 ) {
   let window = app.get_webview_window("main").unwrap();
+  window.hide().unwrap();
+
+  let win_handle = window.clone();
+  window.on_window_event(move | event | {
+    match event{
+      WindowEvent::CloseRequested { api, .. } => {
+        api.prevent_close();
+
+        win_handle.hide().unwrap();
+        win_handle.emit("hide-window", ()).unwrap();
+      }
+      _ => {}
+    }
+  });
+
+  setup_traymenu(app.handle());
 
   let handle = window.clone();
   window.listen("tauri://drag-drop", move |ev| {

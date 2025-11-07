@@ -7,6 +7,7 @@ export interface ParameterListProps{
   changed: ( value: { type: string, desc: string }[] ) => void
 }
 
+// TODO: An actual parameter list
 export let ParameterList = ( props: ParameterListProps ) => {
   let [ parameters, setParameters ] = createSignal<{ type: string, desc: string }[]>(props.value, { equals: false });
   let [ addParametersOpen, setAddParametersOpen ] = createSignal(false);
