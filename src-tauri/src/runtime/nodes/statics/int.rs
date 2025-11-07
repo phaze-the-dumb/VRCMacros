@@ -7,8 +7,6 @@ pub struct StaticInt{
 
 impl StaticInt{
   pub fn new( node: Node ) -> Box<Self>{
-    dbg!(&node);
-
     let value = &node.statics[0].value;
 
     Box::new(Self {

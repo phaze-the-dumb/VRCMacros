@@ -7,8 +7,6 @@ pub struct ConditionalIfFalse{
 
 impl ConditionalIfFalse{
   pub fn new( node: Node ) -> Box<Self>{
-    dbg!(&node);
-
     Box::new(Self {
       outputs: node.outputs.iter()
         .map(| x | {

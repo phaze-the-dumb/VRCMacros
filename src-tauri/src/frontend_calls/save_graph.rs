@@ -4,8 +4,6 @@ use flate2::{write::GzEncoder, Compression};
 
 #[tauri::command]
 pub fn save_graph( graph: String, path: PathBuf ) {
-  dbg!(&graph, &path);
-
   let file = File::create(&path).unwrap();
   let mut encoder = GzEncoder::new(file, Compression::default());
 
