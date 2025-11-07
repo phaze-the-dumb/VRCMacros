@@ -1,16 +1,18 @@
-use std::{
-  collections::HashMap,
-  fs::File,
-  io::{Read, Write},
-  path::PathBuf,
-  sync::Mutex,
-};
+use std::{ collections::HashMap, fs::File, io::{ Read, Write }, path::PathBuf, sync::Mutex };
 
-use flate2::{read::GzDecoder, write::GzEncoder, Compression};
-use serde_json::Value;
+use flate2::{ read::GzDecoder, write::GzEncoder, Compression };
+use serde::{ Deserialize, Serialize };
+
+use crate::structs::nodes::Node;
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct ConfigValues{
+  #[serde(default)]
+  pub loaded_tabs: HashMap<String, Vec<Node>>
+}
 
 pub struct Config {
-  store: Mutex<HashMap<String, Value>>,
+  pub store: Mutex<ConfigValues>,
   path: PathBuf,
 }
 
@@ -26,33 +28,11 @@ impl Config {
       "{}".into()
     };
 
-    let json: Value = serde_json::from_str(&json_string).unwrap();
-
-    let mut hashmap = HashMap::new();
-
-    let obj = json.as_object().unwrap();
-    for (key, val) in obj {
-      hashmap.insert(key.clone(), val.clone());
-    }
+    let json: ConfigValues = serde_json::from_str(&json_string).unwrap();
 
     Config {
-      store: Mutex::new(hashmap),
+      store: Mutex::new(json),
       path: path,
-    }
-  }
-
-  pub fn set(&self, key: &str, value: Value) {
-    self.store.lock().unwrap().insert(key.to_owned(), value);
-  }
-
-  pub fn get(&self, key: &str) -> Option<Value> {
-    let store = self.store.lock().unwrap();
-    let val = store.get(&key.to_owned());
-
-    if val.is_none() {
-      None
-    } else {
-      Some(val.unwrap().clone())
     }
   }
 

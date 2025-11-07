@@ -24,21 +24,35 @@ export class NodeManager{
     NodeManager.Instance = this;
 
     listen('load_new_tab', ( ev: any ) => {
-      this._loadFromConfig(ev.payload.path, ev.payload.graph);
-    })
+      this._loadFromConfig(ev.payload.path, null, ev.payload.graph);
+    });
+
+    invoke('load_previous_tabs').then(async ( tabs: any ) => {
+      let version = await getVersion();
+
+      for(let tab of Object.entries(tabs)){
+        console.log(tab);
+
+        await this._loadFromConfig(null, tab[0], JSON.stringify({
+          tab_name: 'test',
+          version,
+          graph: tab[1]
+        }));
+      };
+    });
   }
 
 
   private _tabUpdateHook: ( tabs: TabHashMap ) => void = () => {};
   private _tabChangeHook: () => void = () => {};
 
-  public async AddTab( name: string ): Promise<Tab>{
+  public async AddTab( name: string, id: string | null = null ): Promise<Tab>{
     let [ selected, setSelected ] = createSignal(false);
     let [ needsSave, setNeedsSave ] = createSignal(false);
 
     let tab: Tab = {
       name: name,
-      id: await NodeManager.Instance.GetNewNodeId(),
+      id: id || await NodeManager.Instance.GetNewNodeId(),
       nodes: [],
       saveLocation: null,
 
@@ -206,7 +220,7 @@ export class NodeManager{
     if(needsSave)tab.setNeedsSave(true);
   }
 
-  private async _loadFromConfig( path: string, config: string ){
+  private async _loadFromConfig( path: string | null, id: string | null, config: string ){
     let json = JSON.parse(config);
 
     if(
@@ -215,7 +229,7 @@ export class NodeManager{
       !json.graph
     )return;
 
-    let tab = await this.AddTab(json.tab_name);
+    let tab = await this.AddTab(json.tab_name, id);
     tab.refuseSync = true;
     tab.saveLocation = path;
 

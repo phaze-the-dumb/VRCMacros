@@ -3,9 +3,9 @@ use crossbeam_channel::{ Receiver, bounded };
 
 use flate2::read::GzDecoder;
 use serde_json::{ Map, Value };
-use tauri::{ App, Emitter, Listener, Manager };
+use tauri::{ App, Emitter, Listener, Manager, State };
 
-use crate::{ osc::{ self, OSCMessage }, runtime::{ commands::RuntimeCommand, nodes::RuntimeNodeTree, runtime, runtime_dry }, structs::parameter_types::ParameterType };
+use crate::{ osc::{ self, OSCMessage }, runtime::{ commands::RuntimeCommand, nodes::RuntimeNodeTree, runtime, runtime_dry }, structs::parameter_types::ParameterType, utils::config::Config };
 
 pub fn setup(
   app: &mut App,

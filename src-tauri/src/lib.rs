@@ -16,7 +16,7 @@ mod runtime;
 #[tokio::main]
 pub async fn run() {
   // TODO: Impl background running by default
-  // TODO: Auto loading last loaded tabs
+  // TODO: Delay close if unsaved tabs
 
   let container_folder = dirs::config_dir().unwrap().join("VRCMacros");
 
@@ -47,7 +47,8 @@ pub async fn run() {
       get_addresses::get_addresses,
       save_graph::save_graph,
       sync_tab::sync_tab,
-      sync_tab::discard_tab
+      sync_tab::discard_tab,
+      load_previous_tabs::load_previous_tabs
     ])
     .manage(conf)
     .manage(&ADDRESSES)
