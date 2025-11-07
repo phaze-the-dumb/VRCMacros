@@ -7,6 +7,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { NodesByID } from "../Nodes/Nodes";
 import { save } from "@tauri-apps/plugin-dialog";
 import { ConfirmationManager } from "./ConfirmationManager";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export interface TabHashMap {
   [details: string] : Tab;
@@ -40,6 +41,41 @@ export class NodeManager{
         }));
       };
     });
+
+    (async () => {
+      let window = await getCurrentWindow();
+
+      window.onCloseRequested(async ev => {
+        ev.preventDefault();
+
+        let tabs = Object.values(this._tabs);
+        let tabsNeedingSaving = tabs.filter(x => x.needsSave());
+
+        for(let tab of tabsNeedingSaving){
+          await new Promise<void>(res => {
+            ConfirmationManager.Instance.ShowConfirmation(
+              `Discard Changes in ${tab.name}?`,
+              'If you close this tab without saving you will lose all changes.',
+              [
+                {
+                  text: 'Save',
+                  callback: async () => {
+                    await this.SaveTab(tab);
+                    res();
+                  }
+                },
+                {
+                  text: 'Don\'t Save',
+                  callback: () => { res(); }
+                }
+              ]
+            )
+          });
+        }
+
+        window.close();
+      });
+    })();
   }
 
 

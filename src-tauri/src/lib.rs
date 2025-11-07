@@ -16,7 +16,6 @@ mod runtime;
 #[tokio::main]
 pub async fn run() {
   // TODO: Impl background running by default
-  // TODO: Delay close if unsaved tabs
 
   let container_folder = dirs::config_dir().unwrap().join("VRCMacros");
 
