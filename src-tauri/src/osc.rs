@@ -1,7 +1,7 @@
 // https://gist.github.com/phaze-the-dumb/634daacb5141eae2f846e20987dba7a8
+use std::net::UdpSocket;
 
-use std::{net::UdpSocket, sync::mpsc::Sender};
-
+use crossbeam_channel::Sender;
 use serde::Serialize;
 
 use crate::structs::parameter_types::ParameterType;

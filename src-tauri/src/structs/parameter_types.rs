@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-#[derive(Serialize, Clone, Debug)]
+#[derive(Serialize, Clone, Debug, PartialEq)]
 #[serde(tag = "key", content = "value")]
 pub enum ParameterType {
   AnyType(String),
@@ -11,4 +11,6 @@ pub enum ParameterType {
   Boolean(bool),
   String(String),
   Flow(bool),
+
+  None
 }

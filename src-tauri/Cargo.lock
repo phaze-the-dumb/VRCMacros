@@ -7,6 +7,7 @@ name = "VRCMacros"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "crossbeam-channel",
  "dirs",
  "flate2",
  "serde",

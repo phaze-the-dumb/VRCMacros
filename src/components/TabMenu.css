@@ -53,6 +53,8 @@
 .tab-meta{
   width: calc(100% - 40px);
   transform: translateY(1px);
+  display: flex;
+  align-items: center;
 }
 
 .tab-meta-input{

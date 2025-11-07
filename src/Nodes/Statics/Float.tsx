@@ -1,21 +1,21 @@
 import { Node, NodeType } from "../../structs/node";
 import { NodeDefinition } from "../Nodes";
 
-export let NodeStaticsInt: NodeDefinition = {
+export let NodeStaticsFloat: NodeDefinition = {
   isSingle: true,
-  name: 'Int',
-  typeId: 'staticint',
+  name: 'Float',
+  typeId: 'staticfloat',
 
   w: 200,
   h: 85,
 
   statics: [{
-    type: NodeType.Int,
+    type: NodeType.Float,
     name: 'Value',
     value: null
   }],
 
-  outputs: [{ name: "Int", type: NodeType.Int }],
+  outputs: [{ name: "Float", type: NodeType.Float }],
 
   onStaticsUpdate: async ( _node: Node ) => {}
 }

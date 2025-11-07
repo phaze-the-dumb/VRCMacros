@@ -1,4 +1,5 @@
-use std::{ collections::HashMap, fs::File, io::Read, sync::{ self, mpsc::Receiver, Mutex } };
+use std::{ collections::HashMap, fs::File, io::Read, sync::Mutex };
+use crossbeam_channel::{ Receiver, bounded };
 
 use flate2::read::GzDecoder;
 use serde_json::{ Map, Value };
@@ -9,7 +10,7 @@ use crate::{ osc::{ self, OSCMessage }, runtime::{ commands::RuntimeCommand, nod
 pub fn setup(
   app: &mut App,
   addresses: &'static Mutex<Vec<OSCMessage>>,
-  runtime_command_receiver: Receiver<RuntimeCommand>
+  mut runtime_command_receiver: Receiver<RuntimeCommand>
 ) {
   let window = app.get_webview_window("main").unwrap();
 
@@ -32,13 +33,13 @@ pub fn setup(
     handle.emit("load_new_tab", Value::Object(map)).unwrap();
   });
 
-  let ( sender, receiver ) = sync::mpsc::channel();
+  let ( sender, receiver ) = bounded(1024);
 
   tokio::spawn(async move {
     osc::start_server(sender, "127.0.0.1:9001");
   });
 
-  let ( runtime_sender, runtime_receiver ) = sync::mpsc::channel();
+  let ( runtime_sender, runtime_receiver ) = bounded(1024);
 
   let runtime_sender_1 = runtime_sender.clone();
   tokio::spawn(async move {
@@ -55,8 +56,8 @@ pub fn setup(
       window.emit("osc-message", &message).unwrap();
 
       let msg = message.clone();
-      let mut addresses = addresses.lock().unwrap();
-      if !addresses.contains(&msg) { addresses.push(msg); }
+      let mut addrs = addresses.lock().unwrap();
+      if !addrs.contains(&msg) { addrs.push(msg); }
 
       runtime_sender.send(RuntimeCommand::OSCMessage(message)).unwrap();
     }
@@ -70,34 +71,26 @@ pub fn setup(
 
       match cmd{
         RuntimeCommand::OSCMessage( msg ) => {
-          for ( _, tab ) in &mut tabs{
-            for ( id, node ) in &tab.nodes{
-              let node = node.lock().unwrap();
+          for ( _, mut tab ) in &mut tabs{
+            let keys: Vec<String> = tab.nodes.keys().map(| x | { x.clone() }).collect();
 
-              if node.is_entrypoint(){
+            for id in keys.clone(){
+              let entry = tab.nodes[&id].is_entrypoint();
+
+              if entry{
                 let args = vec![
                   vec![ ParameterType::String(msg.address.clone()) ], msg.values.clone()
                 ].concat();
 
-                drop(node);
-                // ^^ Drop this MutexGuard before we enter the runtime,
-                //    as it blocks the runtime for gaining a lock on the node
-                //    TODO: Please find a better way of making it mutable
-
-                runtime_dry(id.clone(), &args, tab).unwrap();
+                runtime_dry(id.clone(), &args, &mut tab).unwrap();
               }
             }
 
-            for ( id, node ) in &tab.nodes{
-              let node = node.lock().unwrap();
+            for id in keys{
+              let entry = tab.nodes[&id].is_entrypoint();
 
-              if node.is_entrypoint(){
-                drop(node);
-                // ^^ Drop this MutexGuard before we enter the runtime,
-                //    as it blocks the runtime for gaining a lock on the node
-                //    TODO: Please find a better way of making it mutable
-
-                runtime(id.clone(), tab).unwrap();
+              if entry{
+                let _ = runtime(id.clone(), &mut tab);
               }
             }
           }

@@ -1,21 +1,34 @@
-use std::{collections::HashMap, sync::Mutex};
+use std::collections::HashMap;
 
-use crate::{ runtime::nodes::{ debug::Debug, osctrigger::OSCTrigger }, structs::{ nodes::Node, parameter_types::ParameterType } };
+use crate::{ runtime::nodes::{ conditional::{ ifequal::ConditionalIfEqual, iffalse::ConditionalIfFalse, iftrue::ConditionalIfTrue }, debug::Debug, osctrigger::OSCTrigger, statics::{ float::StaticFloat, int::StaticInt, string::StaticString } }, structs::{ nodes::Node, parameter_types::ParameterType } };
 
 mod osctrigger;
 mod debug;
+mod statics;
+mod conditional;
 
 pub struct RuntimeNodeTree{
-  pub nodes: HashMap<String, Mutex<Box<dyn RuntimeNode>>>
+  pub nodes: HashMap<String, Box<dyn RuntimeNode>>
 }
+
+unsafe impl Send for RuntimeNodeTree{}
 
 impl RuntimeNodeTree{
   pub fn from( tree: Vec<Node> ) -> Self{
-    let mut runtime_nodes: HashMap<String, Mutex<Box<dyn RuntimeNode>>> = HashMap::new();
+    let mut runtime_nodes: HashMap<String, Box<dyn RuntimeNode>> = HashMap::new();
     for node in tree{
       match node.type_id.as_str(){
-        "osctrigger" => { runtime_nodes.insert(node.id.clone(), Mutex::new(OSCTrigger::new(node))); }
-        "debug" => { runtime_nodes.insert(node.id.clone(), Mutex::new(Debug::new(node))); }
+        "osctrigger" => { runtime_nodes.insert(node.id.clone(), OSCTrigger::new(node)); }
+
+        "staticstring" => { runtime_nodes.insert(node.id.clone(), StaticString::new(node)); }
+        "staticint" => { runtime_nodes.insert(node.id.clone(), StaticInt::new(node)); }
+        "staticfloat" => { runtime_nodes.insert(node.id.clone(), StaticFloat::new(node)); }
+
+        "iftrue" => { runtime_nodes.insert(node.id.clone(), ConditionalIfTrue::new(node)); }
+        "iffalse" => { runtime_nodes.insert(node.id.clone(), ConditionalIfFalse::new(node)); }
+        "ifequal" => { runtime_nodes.insert(node.id.clone(), ConditionalIfEqual::new(node)); }
+
+        "debug" => { runtime_nodes.insert(node.id.clone(), Debug::new(node)); }
         _ => {}
       }
     }
@@ -27,7 +40,7 @@ impl RuntimeNodeTree{
 pub trait RuntimeNode{
   fn outputs( &self ) -> Vec<Vec<( String, isize, isize )>>; // Node ID, input index, output value type
   fn execute_dry( &mut self, msg: &Vec<ParameterType> ) -> Option<Vec<ParameterType>>; // Only update values on the first loop through
-  fn execute( &mut self ) -> bool; // Then call functions on the second loop
+  fn execute( &mut self ) -> Option<Vec<ParameterType>>; // Then call functions on the second loop
   fn update_arg( &mut self, index: usize, value: ParameterType ) -> bool;
   fn is_entrypoint( &self ) -> bool;
 }

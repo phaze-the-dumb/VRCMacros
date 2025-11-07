@@ -1,6 +1,6 @@
 import './ControlBar.css';
 
-import { Accessor, createSignal, For, Match, Show, Switch } from 'solid-js';
+import { Accessor, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { Node, NodeType } from '../structs/node';
 import { TextInput } from './TextInput';
 import { invoke } from '@tauri-apps/api/core';
@@ -14,6 +14,10 @@ export interface ControlBarProps{
 }
 
 export let ControlBar = ( props: ControlBarProps ) => {
+  createEffect(() => {
+    console.log(props.node());
+  })
+
   return (
     <div class="control-bar">
       <For each={props.node()?.statics}>
@@ -26,19 +30,55 @@ export let ControlBar = ( props: ControlBarProps ) => {
                 <Match when={item.type == NodeType.String}>
                   { item.name }
                   <div style={{ display: 'inline-block', 'margin-left': '10px' }}>
+                    <input
+                      type="text"
+                      placeholder='Enter Value...'
+                      value={item.value || ''}
+                      onChange={( el ) => {
+                        let value = el.target.value;
+                        let node = props.node()!;
 
+                        item.value = value;
+                        node.onStaticsUpdate(node);
+
+                        NodeManager.Instance.UpdateConfig();
+                      }} />
                   </div>
                 </Match>
                 <Match when={item.type == NodeType.Int}>
                   { item.name }
                   <div style={{ display: 'inline-block', 'margin-left': '10px' }}>
+                    <input
+                      type="number"
+                      placeholder='Enter Value...'
+                      value={item.value !== undefined ? item.value : ''}
+                      onChange={( el ) => {
+                        let value = el.target.value;
+                        let node = props.node()!;
 
+                        item.value = parseInt(value);
+                        node.onStaticsUpdate(node);
+
+                        NodeManager.Instance.UpdateConfig();
+                      }} />
                   </div>
                 </Match>
                 <Match when={item.type == NodeType.Float}>
                   { item.name }
                   <div style={{ display: 'inline-block', 'margin-left': '10px' }}>
+                    <input
+                      type="number"
+                      placeholder='Enter Value...'
+                      value={item.value !== undefined ? item.value : ''}
+                      onChange={( el ) => {
+                        let value = el.target.value;
+                        let node = props.node()!;
 
+                        item.value = parseFloat(value);
+                        node.onStaticsUpdate(node);
+
+                        NodeManager.Instance.UpdateConfig();
+                      }} />
                   </div>
                 </Match>
                 <Match when={item.type == NodeType.OSCAddress}>

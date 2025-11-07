@@ -1,8 +1,10 @@
-use std::{collections::HashMap, fs, sync::{self, Arc, Mutex}};
+use std::{ fs, sync::Mutex };
+use crossbeam_channel::bounded;
+use tokio::sync;
 
 use frontend_calls::*;
 
-use crate::{ osc::OSCMessage, runtime::nodes::RuntimeNodeTree, setup::setup, utils::config::Config };
+use crate::{ osc::OSCMessage, setup::setup, utils::config::Config };
 
 mod frontend_calls;
 mod osc;
@@ -34,7 +36,7 @@ pub async fn run() {
 
   static ADDRESSES: Mutex<Vec<OSCMessage>> = Mutex::new(Vec::new());
 
-  let ( runtime_sender, runtime_receiver ) = sync::mpsc::channel();
+  let ( runtime_sender, runtime_receiver ) = bounded(1024);
 
   tauri::Builder::default()
     .plugin(tauri_plugin_dialog::init())
