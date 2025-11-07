@@ -22,9 +22,7 @@ pub async fn run() {
   match fs::metadata(&container_folder) {
     Ok(meta) => {
       if meta.is_file() {
-        panic!(
-          "document.write('Cannot launch app as the container path is a file not a directory')"
-        );
+        panic!("Cannot launch app as the container path is a file not a directory");
       }
     }
     Err(_) => {
