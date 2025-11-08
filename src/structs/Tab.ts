@@ -13,5 +13,5 @@ export interface Tab{
   needsSave: Accessor<boolean>,
   setNeedsSave: Setter<boolean>,
 
-  refuseSync: boolean
+  needSync: boolean
 }

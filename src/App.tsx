@@ -12,13 +12,9 @@ import { NodeManager } from "./Mangers/NodeManager";
 import { TabMenu } from "./components/TabMenu";
 import { ConfirmationPopup } from "./components/ConfirmationPopup";
 
-let App = () => {
-  // TODO: Keybind system
-  // TODO: Delete selected node when delete key is pressed
-  // TODO: Copy / paste
-  // TODO: Add undo / redo -ing
-  // TODO: Multi-select
+import * as keybinds from './keybinds';
 
+let App = () => {
   let [ selectedNode, setSelectedNode ] = createSignal<Node | null>(null);
 
   let canvas!: HTMLCanvasElement;
@@ -324,6 +320,8 @@ let App = () => {
       isDrawing = false;
       isMouseDown = false;
     }
+
+    keybinds.load(selectedNode);
 
     requestAnimationFrame(update);
   });

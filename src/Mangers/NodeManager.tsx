@@ -7,7 +7,6 @@ import { getVersion } from "@tauri-apps/api/app";
 import { NodesByID } from "../Nodes/Nodes";
 import { save } from "@tauri-apps/plugin-dialog";
 import { ConfirmationManager } from "./ConfirmationManager";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export interface TabHashMap {
   [details: string] : Tab;
@@ -23,6 +22,15 @@ export class NodeManager{
 
   constructor(){
     NodeManager.Instance = this;
+
+    setInterval(() => {
+      let tabs = Object.values(this._tabs).filter(x => x.needSync);
+      console.log('Syncing ' + tabs.length + ' tabs');
+      for(let tab of tabs){
+        invoke('sync_tab', { graph: this._generateTabGraph(tab.id)[0], id: tab.id, name: tab.name, location: tab.saveLocation });
+        tab.needSync = false;
+      }
+    }, 1000);
 
     listen('load_new_tab', ( ev: any ) => {
       this._loadFromConfig(ev.payload.path, null, ev.payload.graph);
@@ -78,6 +86,11 @@ export class NodeManager{
   private _tabUpdateHook: ( tabs: TabHashMap ) => void = () => {};
   private _tabChangeHook: () => void = () => {};
 
+  public CurrentTab(): Tab | null{
+    if(!this._selectedTab)return null
+    return this._tabs[this._selectedTab] || null;
+  }
+
   public async AddTab( name: string, id: string | null = null ): Promise<Tab>{
     let [ selected, setSelected ] = createSignal(false);
     let [ needsSave, setNeedsSave ] = createSignal(false);
@@ -94,7 +107,7 @@ export class NodeManager{
       needsSave,
       setNeedsSave,
 
-      refuseSync: false
+      needSync: false
     };
 
     this._tabs[tab.id] = tab;
@@ -189,9 +202,10 @@ export class NodeManager{
     }
   }
 
-  public async SaveTab( tab: Tab ){
+  public async SaveTab( tab: Tab, ignoreSaveLocation: boolean = false ){
     let path =
-      tab.saveLocation ||
+      tab.saveLocation && !ignoreSaveLocation ?
+      tab.saveLocation :
       await save({ defaultPath: tab.name + '.macro', filters: [ { name: 'Macro Files', extensions: [ 'macro' ] } ] });
 
     if(!path)throw new Error("Cannot save");
@@ -246,8 +260,8 @@ export class NodeManager{
     let tab = this._tabs[this._selectedTab];
     if(!tab)return;
 
-    if(tab.refuseSync)return;
-    invoke('sync_tab', { graph: this._generateTabGraph(tab.id)[0], id: tab.id, name: tab.name, location: tab.saveLocation });
+    tab.nodes = this._nodes;
+    tab.needSync = true;
 
     if(needsSave)tab.setNeedsSave(true);
   }
@@ -262,7 +276,7 @@ export class NodeManager{
     )return;
 
     let tab = await this.AddTab(json.tab_name, id);
-    tab.refuseSync = true;
+    tab.needSync = false;
     tab.saveLocation = path;
 
     this._nodes = [];
@@ -293,6 +307,8 @@ export class NodeManager{
           let input = output.connections[k];
           let node = this._nodes.find(x => x.id === input.node)!;
 
+          if(!node)continue;
+
           let realInput = node.inputs.find(x => x.index === input.index);
           let realOutput = outputParentNode.outputs[j];
 
@@ -318,7 +334,7 @@ export class NodeManager{
     tab.setNeedsSave(false);
     tab.nodes = this._nodes;
 
-    tab.refuseSync = false;
+    tab.needSync = false;
     if(!id)this.UpdateConfig(false);
   }
 

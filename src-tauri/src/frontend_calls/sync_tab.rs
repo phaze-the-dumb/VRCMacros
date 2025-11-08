@@ -18,7 +18,4 @@ pub fn discard_tab( id: String, cmd: State<Sender<RuntimeCommand>>, conf: State<
 
   let mut config = conf.store.lock().unwrap();
   config.loaded_tabs.remove(&id);
-  drop(config);
-
-  conf.save();
 }
