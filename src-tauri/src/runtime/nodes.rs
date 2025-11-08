@@ -1,11 +1,12 @@
 use std::collections::HashMap;
 
-use crate::{ runtime::nodes::{ conditional::{ ifequal::ConditionalIfEqual, iffalse::ConditionalIfFalse, iftrue::ConditionalIfTrue }, debug::Debug, osctrigger::OSCTrigger, statics::{ float::StaticFloat, int::StaticInt, string::StaticString } }, structs::{ nodes::Node, parameter_types::ParameterType } };
+use crate::{ runtime::nodes::{ conditional::{ ifequal::ConditionalIfEqual, iffalse::ConditionalIfFalse, iftrue::ConditionalIfTrue }, debug::Debug, oscactions::sendchatbox::OSCActionsSendChatbox, osctrigger::OSCTrigger, statics::{ float::StaticFloat, int::StaticInt, string::StaticString } }, structs::{ nodes::Node, parameter_types::ParameterType } };
 
 mod osctrigger;
 mod debug;
 mod statics;
 mod conditional;
+mod oscactions;
 
 pub struct RuntimeNodeTree{
   pub nodes: HashMap<String, Box<dyn RuntimeNode>>
@@ -27,6 +28,8 @@ impl RuntimeNodeTree{
         "iftrue" => { runtime_nodes.insert(node.id.clone(), ConditionalIfTrue::new(node)); }
         "iffalse" => { runtime_nodes.insert(node.id.clone(), ConditionalIfFalse::new(node)); }
         "ifequal" => { runtime_nodes.insert(node.id.clone(), ConditionalIfEqual::new(node)); }
+
+        "oscsendchatbox" => { runtime_nodes.insert(node.id.clone(), OSCActionsSendChatbox::new(node)); }
 
         "debug" => { runtime_nodes.insert(node.id.clone(), Debug::new(node)); }
         _ => {}

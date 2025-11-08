@@ -160,6 +160,5 @@ pub fn send_message(address: &str, values: Vec<ParameterType>, ip_addr: &str) {
     }
   }
 
-  println!("{:X?}", &buf);
   socket.send_to(&buf, ip_addr).unwrap();
 }
