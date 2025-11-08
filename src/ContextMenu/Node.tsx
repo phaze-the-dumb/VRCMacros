@@ -1,8 +1,9 @@
+import { Accessor, Setter } from "solid-js";
 import { NodeManager } from "../Mangers/NodeManager";
 import { PositionInfo } from "../renderer";
 import { Node } from "../structs/node";
 
-export let NodeContextMenu = ( clickedNode: Node ) => [
+export let NodeContextMenu = ( clickedNode: Node, selectedNode: Accessor<Node | null>, setSelectedNode: Setter<Node | null>  ) => [
   {
     text: "Delete Node",
     clicked: ( _e: MouseEvent, _canvas: HTMLCanvasElement, _position: PositionInfo ) => {
@@ -18,7 +19,9 @@ export let NodeContextMenu = ( clickedNode: Node ) => [
         })
       })
 
-      // TODO: If node is currently selected, deselect it.
+      let selected = selectedNode();
+      if(selected && clickedNode.id === selected.id)setSelectedNode(null);
+
       NodeManager.Instance.RemoveNode(clickedNode!)
     },
     hovered: false

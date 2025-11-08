@@ -1,12 +1,11 @@
-import { Accessor } from "solid-js";
+import { Accessor, Setter } from "solid-js";
 import { NodeManager } from "./Mangers/NodeManager";
 import { Node } from "./structs/node";
 
 let isKeyDown: any = {};
 
-export let load = ( selectedNode: Accessor<Node | null> ) => {
+export let load = ( selectedNode: Accessor<Node | null>, setSelectedNode: Setter<Node | null> ) => {
   // TODO: Keybind system
-  // TODO: Delete selected node when delete key is pressed
   // TODO: Copy / paste
   // TODO: Add undo / redo -ing
 
@@ -32,7 +31,7 @@ export let load = ( selectedNode: Accessor<Node | null> ) => {
           })
         })
 
-        // TODO: If node is currently selected, deselect it.
+        setSelectedNode(null);
         NodeManager.Instance.RemoveNode(node);
         break;
       case 's':

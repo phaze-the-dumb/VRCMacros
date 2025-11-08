@@ -12,7 +12,7 @@ export let NodeStaticsFloat: NodeDefinition = {
   statics: [{
     type: NodeType.Float,
     name: 'Value',
-    value: null
+    value: 0.0
   }],
 
   outputs: [{ name: "Float", type: NodeType.Float }],

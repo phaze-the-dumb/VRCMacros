@@ -25,7 +25,6 @@ export class NodeManager{
 
     setInterval(() => {
       let tabs = Object.values(this._tabs).filter(x => x.needSync);
-      console.log('Syncing ' + tabs.length + ' tabs');
       for(let tab of tabs){
         invoke('sync_tab', { graph: this._generateTabGraph(tab.id)[0], id: tab.id, name: tab.name, location: tab.saveLocation });
         tab.needSync = false;
@@ -40,8 +39,6 @@ export class NodeManager{
       let version = await getVersion();
 
       for(let tab of Object.entries<any>(tabs)){
-        console.log(tab);
-
         await this._loadFromConfig(tab[1][2], tab[0], JSON.stringify({
           tab_name: tab[1][1],
           version,

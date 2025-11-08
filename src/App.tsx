@@ -100,7 +100,7 @@ let App = () => {
       }
 
       if(clickedNode){
-        contextMenu.items = NodeContextMenu(clickedNode);
+        contextMenu.items = NodeContextMenu(clickedNode, selectedNode, setSelectedNode);
       } else{
         contextMenu.items = CanvasContextMenu;
       }
@@ -321,8 +321,7 @@ let App = () => {
       isMouseDown = false;
     }
 
-    keybinds.load(selectedNode);
-
+    keybinds.load(selectedNode, setSelectedNode);
     requestAnimationFrame(update);
   });
 

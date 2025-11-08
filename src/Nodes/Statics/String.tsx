@@ -12,7 +12,7 @@ export let NodeStaticsString: NodeDefinition = {
   statics: [{
     type: NodeType.String,
     name: 'Value',
-    value: null
+    value: 'Hello World!'
   }],
 
   outputs: [{ name: "String", type: NodeType.String }],
