@@ -74,11 +74,24 @@ export enum NodeType{
   ParameterList = 10
 }
 
+let NodeIOCastTable: any = {
+  1: { 2: true, 3: true, 4: true }, // Strings -> Floats, Ints, Bools
+  2: { 1: true, 3: true },          // Floats -> Strings, Ints
+  3: { 1: true, 2: true, 4: true }, // Ints -> Strings, Floats, Bools
+  4: { 1: true, 2: true, 3: true }  // Bools -> Strings, Ints, Floats
+};
+
 export let NodeIOCanCast = ( input: NodeType | null, output: NodeType | null ): boolean => {
   if(input === output)return true;
   if(!input || !output)return false;
 
-  return false;
+  let CastFrom = NodeIOCastTable[input];
+  if(!CastFrom)return false;
+
+  let CastTo = CastFrom[output];
+  if(!CastTo)return false;
+
+  return true;
 }
 
 export let NodeIOResolveAnyTypes = ( nodeio: NodeIO ): NodeType | null => {
@@ -112,7 +125,7 @@ export let NodeIOResolveAnyTypes = ( nodeio: NodeIO ): NodeType | null => {
   return null;
 }
 
-export let NodeIOLinkColours = ( nodeio: NodeIO ) => {
+export let NodeIOLinkColours = ( nodeio: NodeIO, output?: NodeIO ) => {
   let cols: any = {
     1: '#ffff9f',
     2: '#cda0cb',
@@ -122,6 +135,19 @@ export let NodeIOLinkColours = ( nodeio: NodeIO ) => {
   }
 
   let type = NodeIOResolveAnyTypes(nodeio);
+  if(output){
+    let outputType = NodeIOResolveAnyTypes(output);
+    let startType = type ? cols[type] : '#fff5';
+
+    if(type !== outputType){
+      let endType = outputType ? cols[outputType] : '#fff5';
+
+      return [ startType, endType ];
+    } else{
+      return [ startType, startType ];
+    }
+  }
+
   return type ? cols[type] : '#fff5';
 }
 

@@ -26,14 +26,9 @@ impl RuntimeNode for ConditionalIfTrue{
   }
 
   fn update_arg( &mut self, _: usize, arg: ParameterType ) -> bool {
-    if let ParameterType::Boolean(boolean) = arg{
-      if boolean{
-        self.runtime_active = true;
-        true
-      } else{
-        self.runtime_active = false;
-        false
-      }
+    if arg.as_bool().unwrap(){
+      self.runtime_active = true;
+      true
     } else{
       self.runtime_active = false;
       false

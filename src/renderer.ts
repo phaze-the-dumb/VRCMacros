@@ -145,15 +145,21 @@ export let renderNodes = (
 
     node.outputs.map(( output, i ) => {
       output.connections.map(partner => {
-        ctx.strokeStyle = NodeIOLinkColours(output);
+        let x0 = (nodeX + (node.w - 10) + 10 + startX + position.x) * position.scale;
+        let y0 = (nodeY + 50 + (30 * i) + 10 + startY + position.y) * position.scale;
+        let x1 = ((Math.round(partner.parent.x / 10) * 10) + startX + position.x) * position.scale;
+        let y1 = ((Math.round(partner.parent.y / 10) * 10) + 60 + (30 * partner.index) + startY + position.y) * position.scale;
+
+        let colours = NodeIOLinkColours(output, partner);
+        let grad = ctx.createLinearGradient(x0, y0, x1, y1);
+
+        grad.addColorStop(0, colours[0]);
+        grad.addColorStop(1, colours[1]);
+
+        ctx.strokeStyle = grad;
         ctx.lineWidth = 3 * position.scale;
 
-        drawCurve(ctx,
-          (nodeX + (node.w - 10) + 10 + startX + position.x) * position.scale,
-          (nodeY + 50 + (30 * i) + 10 + startY + position.y) * position.scale,
-          ((Math.round(partner.parent.x / 10) * 10) + startX + position.x) * position.scale,
-          ((Math.round(partner.parent.y / 10) * 10) + 60 + (30 * partner.index) + startY + position.y) * position.scale,
-        );
+        drawCurve(ctx, x0, y0, x1, y1);
         ctx.stroke();
       })
     })
