@@ -117,6 +117,9 @@
   border-radius: 5px;
   transition: 0.1s;
   background: transparent;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .tab-icon-bar img:hover{

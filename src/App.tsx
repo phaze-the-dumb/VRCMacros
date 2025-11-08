@@ -2,7 +2,7 @@ import { createSignal, onCleanup, onMount } from "solid-js";
 import "./App.css";
 import { renderBackgroundGrid, renderContextMenu, renderNodes, renderNullTab, renderTempDrawing } from "./renderer";
 import { lerp } from "./utils/lerp";
-import { Node, NodeIO, NodeIOResolveAnyTypes } from "./structs/node";
+import { Node, NodeIO, NodeIOCanCast, NodeIOResolveAnyTypes } from "./structs/node";
 import { isPointInRect, isPointInRectApplyOffset, screenToWorldSpace } from "./utils/interections";
 import { ControlBar } from "./components/ControlBar";
 import { CanvasContextMenu } from "./ContextMenu/Canvas";
@@ -13,9 +13,11 @@ import { TabMenu } from "./components/TabMenu";
 import { ConfirmationPopup } from "./components/ConfirmationPopup";
 
 let App = () => {
-  // TODO: Delete selected node when delete key is pressed
   // TODO: Keybind system
+  // TODO: Delete selected node when delete key is pressed
+  // TODO: Copy / paste
   // TODO: Add undo / redo -ing
+  // TODO: Multi-select
 
   let [ selectedNode, setSelectedNode ] = createSignal<Node | null>(null);
 
@@ -123,6 +125,11 @@ let App = () => {
         return;
       }
 
+      if(e.shiftKey){
+        // TODO: Multi-select
+        return;
+      }
+
       if(contextMenu.visible){
         let submenus: ContextMenu[] = [];
         contextMenu.items.map(x => x.menu ? submenus.push(x.menu): null);
@@ -161,18 +168,21 @@ let App = () => {
 
           if(isPointInRectApplyOffset(canvas, { x: offset[0], y: offset[1], scale },
             e.clientX, e.clientY,
-            node.x, node.y, node.w, node.h
+            node.x - 20, node.y, node.w + 40, node.h
           )){
             node.outputs.map(( output, i ) => {
               if(isPointInRectApplyOffset(canvas, { x: offset[0], y: offset[1], scale },
                 e.clientX, e.clientY,
-                node.x + (node.w - 30),
+                node.x + (node.w - 10),
                 node.y + 50 + (30 * i),
                 20, 20
               )){
                 output.index = i;
 
-                drawingTo = [ node.x + (node.w - 30), node.y + 50 + (30 * i) ];
+                drawingTo = [
+                  node.x + (node.w - 10),
+                  node.y + 50 + (30 * i)
+                ];
                 drawingFrom = output;
 
                 isDrawing = true;
@@ -183,7 +193,7 @@ let App = () => {
             node.inputs.map(( input, i ) => {
               if(isPointInRectApplyOffset(canvas, { x: offset[0], y: offset[1], scale },
                 e.clientX, e.clientY,
-                node.x + 10,
+                node.x - 10,
                 node.y + 50 + (30 * i),
                 20, 20
               )){
@@ -285,7 +295,7 @@ let App = () => {
           node.inputs.map(( input, i ) => {
             if(isPointInRectApplyOffset(canvas, { x: offset[0], y: offset[1], scale },
               e.clientX, e.clientY,
-              node.x + 10,
+              node.x - 10,
               node.y + 50 + (30 * i),
               20, 20
             )){
@@ -297,7 +307,7 @@ let App = () => {
                   drawingFrom!.connections.indexOf(input) === -1 &&
                   (
                     toType === null ||
-                    fromType === toType
+                    NodeIOCanCast(fromType, toType)
                   )
                 ){
                   drawingFrom!.connections.push(input);

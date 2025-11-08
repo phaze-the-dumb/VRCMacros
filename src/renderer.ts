@@ -63,8 +63,8 @@ export let renderNodes = (
     let nodeX = Math.round(node.x / 10) * 10;
     let nodeY = Math.round(node.y / 10) * 10;
 
-    ctx.fillStyle = '#1f2129';
-    ctx.strokeStyle = node.selected ? '#004696ff' : '#fff5';
+    ctx.fillStyle = '#343742ff';
+    ctx.strokeStyle = node.selected ? '#004696ff' : '#fff0';
     ctx.lineWidth = 5 * position.scale;
 
     // Draw Node Box
@@ -75,12 +75,17 @@ export let renderNodes = (
       node.h * position.scale,
       10 * position.scale);
 
+    ctx.shadowColor = '#0005';
+    ctx.shadowBlur = 10;
+
     ctx.stroke();
     ctx.fill();
 
+    ctx.shadowBlur = 0;
+
     // Draw Node Name
     ctx.fillStyle = '#fff';
-    ctx.font = (25 * position.scale) + 'px Comic Mono';
+    ctx.font = (25 * position.scale) + 'px Rubik';
     ctx.textAlign = 'center';
 
     ctx.fillText(node.name,
@@ -89,19 +94,24 @@ export let renderNodes = (
     );
 
     // Draw Inputs
-    ctx.font = (15 * position.scale) + 'px Comic Mono';
+    ctx.font = (15 * position.scale) + 'px Rubik';
     ctx.textAlign = 'left';
 
     node.inputs.map(( input, i ) => {
       ctx.fillStyle = NodeIOLinkColours(input);
-      ctx.fillRect(
-        (nodeX + 10 + startX + position.x) * position.scale,
-        (nodeY + 50 + (30 * i) + startY + position.y) * position.scale,
-        20 * position.scale, 20 * position.scale
-      )
+
+      ctx.beginPath();
+      ctx.arc(
+        (nodeX - 10 + startX + 10 + position.x) * position.scale,
+        (nodeY + 50 + (30 * i) + startY + 10 + position.y) * position.scale,
+        7 * position.scale,
+        0,
+        Math.PI * 2,
+      );
+      ctx.fill();
 
       ctx.fillText(input.name,
-        (nodeX + 35 + startX + position.x) * position.scale,
+        (nodeX + 15 + startX + position.x) * position.scale,
         (nodeY + 53 + (30 * i) + startY + position.y) * position.scale,
       )
     })
@@ -111,14 +121,19 @@ export let renderNodes = (
 
     node.outputs.map(( output, i ) => {
       ctx.fillStyle = NodeIOLinkColours(output);
-      ctx.fillRect(
-        (nodeX + (node.w - 30) + startX + position.x) * position.scale,
-        (nodeY + 50 + (30 * i) + startY + position.y) * position.scale,
-        20 * position.scale, 20 * position.scale
-      )
+
+      ctx.beginPath();
+      ctx.arc(
+        (nodeX + (node.w - 10) + startX + 10 + position.x) * position.scale,
+        (nodeY + 50 + (30 * i) + startY + 10 + position.y) * position.scale,
+        7 * position.scale,
+        0,
+        Math.PI * 2,
+      );
+      ctx.fill();
 
       ctx.fillText(output.name,
-        (nodeX + (node.w - 35) + startX + position.x) * position.scale,
+        (nodeX + (node.w - 15) + startX + position.x) * position.scale,
         (nodeY + 53 + (30 * i) + startY + position.y) * position.scale,
       )
     })
@@ -131,10 +146,12 @@ export let renderNodes = (
     node.outputs.map(( output, i ) => {
       output.connections.map(partner => {
         ctx.strokeStyle = NodeIOLinkColours(output);
+        ctx.lineWidth = 3 * position.scale;
+
         drawCurve(ctx,
-          (nodeX + (node.w - 30) + 10 + startX + position.x) * position.scale,
+          (nodeX + (node.w - 10) + 10 + startX + position.x) * position.scale,
           (nodeY + 50 + (30 * i) + 10 + startY + position.y) * position.scale,
-          ((Math.round(partner.parent.x / 10) * 10) + 20 + startX + position.x) * position.scale,
+          ((Math.round(partner.parent.x / 10) * 10) + startX + position.x) * position.scale,
           ((Math.round(partner.parent.y / 10) * 10) + 60 + (30 * partner.index) + startY + position.y) * position.scale,
         );
         ctx.stroke();
@@ -148,7 +165,7 @@ export let renderContextMenu = (
   contextMenu: ContextMenu
 ) => {
   if(contextMenu.visible){
-    ctx.font = '20px Arial';
+    ctx.font = '20px Rubik';
     ctx.textBaseline = 'top';
     ctx.textAlign = 'left';
 
@@ -192,24 +209,30 @@ export let renderTempDrawing = (
   let startX = canvas.width / -2;
   let startY = canvas.height / -2;
 
-  ctx.fillStyle = '#f00';
+  // DEBUG STUFF
+  // ctx.fillStyle = '#f00';
 
-  ctx.fillRect(
-    (drawingTo[0] + 10 + startX + position.x) * position.scale,
-    (drawingTo[1] + 10 + startY + position.y) * position.scale,
-    10, 10
-  );
+  // ctx.fillRect(
+  //   (drawingTo[0] + 10 + startX + position.x) * position.scale,
+  //   (drawingTo[1] + 10 + startY + position.y) * position.scale,
+  //   10, 10
+  // );
 
-  ctx.fillRect(
-    (drawingFrom.parent.x + (drawingFrom.parent.w - 30) + 10 + startX + position.x) * position.scale,
-    (drawingFrom.parent.y + 50 + (30 * drawingFrom.index) + 10 + startY + position.y) * position.scale,
-    10, 10
-  );
+  // ctx.fillRect(
+  //   (drawingFrom.parent.x + (drawingFrom.parent.w - 10) + 10 + startX + position.x) * position.scale,
+  //   (drawingFrom.parent.y + 50 + (30 * drawingFrom.index) + 10 + startY + position.y) * position.scale,
+  //   10, 10
+  // );
 
   ctx.strokeStyle = NodeIOLinkColours(drawingFrom);
+  ctx.lineWidth = 3 * position.scale;
+
+  let nodeX = Math.round(drawingFrom.parent.x / 10) * 10;
+  let nodeY = Math.round(drawingFrom.parent.y / 10) * 10;
+
   drawCurve(ctx,
-    (drawingFrom.parent.x + (drawingFrom.parent.w - 30) + 10 + startX + position.x) * position.scale,
-    (drawingFrom.parent.y + 50 + (30 * drawingFrom.index) + 10 + startY + position.y) * position.scale,
+    (nodeX + (drawingFrom.parent.w - 10) + 10 + startX + position.x) * position.scale,
+    (nodeY + 50 + (30 * drawingFrom.index) + 10 + startY + position.y) * position.scale,
     (drawingTo[0] + 10 + startX + position.x) * position.scale,
     (drawingTo[1] + 10 + startY + position.y) * position.scale,
   );
@@ -239,17 +262,17 @@ export let renderNullTab = (
 ) => {
   ctx.fillStyle = '#fff';
 
-  ctx.font = '20px Arial';
+  ctx.font = '20px Rubik';
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
 
   let textX = lerp((canvas.width / -2) + 200, canvas.width / 2, 0.5);
   let textY = lerp((canvas.height / -2) + 40, canvas.height / 2, 0.5);
 
-  ctx.font = '40px Arial';
+  ctx.font = '40px Rubik';
   ctx.fillText('Welcome to VRCMacros', textX, textY);
 
-  ctx.font = '20px Arial';
+  ctx.font = '20px Rubik';
   ctx.fillText('Create a new tab to get started!', textX, textY + 40);
 }
 

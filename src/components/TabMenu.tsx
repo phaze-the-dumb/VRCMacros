@@ -4,6 +4,7 @@ import { createSignal, For, onMount, Show } from 'solid-js';
 import { NodeManager } from '../Mangers/NodeManager';
 import { Tab } from '../structs/Tab';
 import { SettingsMenu } from './SettingsMenu';
+import { openUrl } from '@tauri-apps/plugin-opener';
 
 export let TabMenu = () => {
   let [ tabImportOpen, setTabImportOpen ] = createSignal(false);
@@ -25,7 +26,7 @@ export let TabMenu = () => {
       <Show when={settingsOpen()}>
         <SettingsMenu close={() => setSettingsOpen(false)} />
       </Show>
-      
+
       <div class="tab-menu">
         <div class="tab-container">
           <For each={Object.values(tabs())}>
@@ -86,6 +87,8 @@ export let TabMenu = () => {
 
         <div class="tab-icon-bar">
           <img src="/assets/icons/gear-solid-full.svg" width="25" onClick={() => setSettingsOpen(true)} />
+          <div style={{ width: 'calc(100% - 50px)' }}></div>
+          <img src="/assets/icons/circle-info-solid-full.svg" width="25" onClick={() => openUrl('https://github.com/phaze-the-dumb/VRCMacros/wiki')} />
         </div>
       </div>
     </>

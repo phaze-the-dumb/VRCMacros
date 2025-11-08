@@ -74,6 +74,13 @@ export enum NodeType{
   ParameterList = 10
 }
 
+export let NodeIOCanCast = ( input: NodeType | null, output: NodeType | null ): boolean => {
+  if(input === output)return true;
+  if(!input || !output)return false;
+
+  return false;
+}
+
 export let NodeIOResolveAnyTypes = ( nodeio: NodeIO ): NodeType | null => {
   if(nodeio.type > 0 && nodeio.type < 6){
     // It's a base type

@@ -10,7 +10,7 @@ export let NodeOSCTrigger: NodeDefinition = {
   typeId: 'osctrigger',
 
   w: 200,
-  h: 50,
+  h: 55,
 
   statics: [
     {
@@ -83,7 +83,7 @@ export let NodeOSCTrigger: NodeDefinition = {
       }
     });
 
-    node.h = 60 + (parameters.length + 1) * 30;
+    node.h = 65 + (parameters.length + 1) * 30;
     NodeManager.Instance.UpdateConfig();
   }
 };
