@@ -10,7 +10,7 @@ export let ConfirmationPopup = () => {
           <div class="confirmation-popup">
             <h2>{ConfirmationManager.Instance.Text()}</h2>
             <p>{ConfirmationManager.Instance.Body()}</p>
-            
+
             <div class="confirmation-buttons">
               <For each={ConfirmationManager.Instance.Buttons()}>
                 { item =>

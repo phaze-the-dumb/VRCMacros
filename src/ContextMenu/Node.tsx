@@ -3,7 +3,7 @@ import { NodeManager } from "../Mangers/NodeManager";
 import { PositionInfo } from "../renderer";
 import { Node } from "../structs/node";
 
-export let NodeContextMenu = ( clickedNode: Node, selectedNode: Accessor<Node | null>, setSelectedNode: Setter<Node | null>  ) => [
+export let NodeContextMenu = ( clickedNode: Node, selectedNode: Accessor<Node[]>, setSelectedNode: Setter<Node[]>  ) => [
   {
     text: "Delete Node",
     clicked: ( _e: MouseEvent, _canvas: HTMLCanvasElement, _position: PositionInfo ) => {
@@ -20,7 +20,16 @@ export let NodeContextMenu = ( clickedNode: Node, selectedNode: Accessor<Node | 
       })
 
       let selected = selectedNode();
-      if(selected && clickedNode.id === selected.id)setSelectedNode(null);
+      for (let i = 0; i < selected.length; i++) {
+        let node = selected[i];
+
+        if(node.id === clickedNode.id){
+          selected.splice(i, 1);
+          setSelectedNode(selected);
+
+          break;
+        }
+      }
 
       NodeManager.Instance.RemoveNode(clickedNode!)
     },

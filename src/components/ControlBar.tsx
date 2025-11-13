@@ -9,7 +9,7 @@ import { ParameterList } from './ParameterList';
 import { NodeManager } from '../Mangers/NodeManager';
 
 export interface ControlBarProps{
-  node: Accessor<Node | null>,
+  node: Accessor<Node[]>,
   lockMovement: ( lock: boolean ) => void
 }
 
@@ -20,7 +20,7 @@ export let ControlBar = ( props: ControlBarProps ) => {
 
   return (
     <div class="control-bar">
-      <For each={props.node()?.statics}>
+      <For each={props.node()[0]?.statics}>
         { ( item ) => {
           let [ popupOpen, setPopupOpen ] = createSignal(false);
 
@@ -36,7 +36,7 @@ export let ControlBar = ( props: ControlBarProps ) => {
                       value={item.value || ''}
                       onChange={( el ) => {
                         let value = el.target.value;
-                        let node = props.node()!;
+                        let node = props.node()[0]!;
 
                         item.value = value;
                         node.onStaticsUpdate(node);
@@ -54,7 +54,7 @@ export let ControlBar = ( props: ControlBarProps ) => {
                       value={item.value !== undefined ? item.value : ''}
                       onChange={( el ) => {
                         let value = el.target.value;
-                        let node = props.node()!;
+                        let node = props.node()[0]!;
 
                         item.value = parseInt(value);
                         node.onStaticsUpdate(node);
@@ -72,7 +72,7 @@ export let ControlBar = ( props: ControlBarProps ) => {
                       value={item.value !== undefined ? item.value : ''}
                       onChange={( el ) => {
                         let value = el.target.value;
-                        let node = props.node()!;
+                        let node = props.node()[0]!;
 
                         item.value = parseFloat(value);
                         node.onStaticsUpdate(node);
@@ -92,7 +92,7 @@ export let ControlBar = ( props: ControlBarProps ) => {
                         return addresses.map(x => x.address).filter(x => x.toLowerCase().includes(text.toLowerCase()));
                       }}
                       change={( text ) => {
-                        let node = props.node()!;
+                        let node = props.node()[0]!;
 
                         item.value = text;
                         node.onStaticsUpdate(node);
@@ -118,7 +118,7 @@ export let ControlBar = ( props: ControlBarProps ) => {
                       }}
                       value={item.value}
                       changed={( value ) => {
-                        let node = props.node()!;
+                        let node = props.node()[0]!;
 
                         item.value = value;
                         node.onStaticsUpdate(node);

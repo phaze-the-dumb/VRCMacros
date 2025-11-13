@@ -13,9 +13,10 @@ import { TabMenu } from "./components/TabMenu";
 
 import * as keybinds from './keybinds';
 import { listen } from "@tauri-apps/api/event";
+import { ConfirmationPopup } from "./components/ConfirmationPopup";
 
 let App = () => {
-  let [ selectedNode, setSelectedNode ] = createSignal<Node | null>(null);
+  let [ selectedNodes, setSelectedNodes ] = createSignal<Node[]>([]);
 
   let canvas!: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
@@ -57,7 +58,7 @@ let App = () => {
   }
 
   onMount(async () => {
-    NodeManager.Instance.HookTabChange(() => setSelectedNode(null));
+    NodeManager.Instance.HookTabChange(() => setSelectedNodes([]));
 
     ctx = canvas.getContext('2d')!;
 
@@ -100,7 +101,7 @@ let App = () => {
       }
 
       if(clickedNode){
-        contextMenu.items = NodeContextMenu(clickedNode, selectedNode, setSelectedNode);
+        contextMenu.items = NodeContextMenu(clickedNode, selectedNodes, setSelectedNodes);
       } else{
         contextMenu.items = CanvasContextMenu;
       }
@@ -118,11 +119,6 @@ let App = () => {
 
       if(e.button !== 0){
         contextMenu.visible = false;
-        return;
-      }
-
-      if(e.shiftKey){
-        // TODO: Multi-select
         return;
       }
 
@@ -160,7 +156,7 @@ let App = () => {
 
       if(nodes){
         nodes.map(node => {
-          node.selected = false;
+          if(!e.shiftKey)node.selected = false;
 
           if(isPointInRectApplyOffset(canvas, { x: offset[0], y: offset[1], scale },
             e.clientX, e.clientY,
@@ -220,9 +216,23 @@ let App = () => {
 
       movingNode = clickedNode;
 
-      if(clickedNode){
+      if(!e.shiftKey){
+        if(clickedNode){
+          clickedNode.selected = true;
+          setSelectedNodes([ clickedNode ]);
+        } else{
+          setSelectedNodes([]);
+        }
+      } else{
         clickedNode.selected = true;
-        setSelectedNode(clickedNode);
+
+        let snodes = selectedNodes();
+        if(!snodes.find(x => x.id === clickedNode!.id)){
+          snodes.push(clickedNode);
+          clickedNode.selected = true;
+
+          setSelectedNodes(snodes);
+        }
       }
 
       isMouseDown = true;
@@ -230,6 +240,36 @@ let App = () => {
     }
 
     canvas.onmousemove = ( e ) => {
+      if(e.shiftKey && isMouseDown){
+        let nodes = NodeManager.Instance.GetNodes();
+        let hoveredNode: Node | null = null;
+
+        if(nodes){
+          nodes.map(node => {
+            if(isPointInRectApplyOffset(canvas, { x: offset[0], y: offset[1], scale },
+              e.clientX, e.clientY,
+              node.x - 20, node.y, node.w + 40, node.h
+            )){
+              hoveredNode = node;
+              return;
+            }
+          })
+        }
+
+        if(hoveredNode !== null){
+          let snodes = selectedNodes();
+          if(!snodes.find(x => x.id === hoveredNode!.id)){
+            snodes.push(hoveredNode);
+
+            // @ts-ignore
+            hoveredNode.selected = true;
+            setSelectedNodes(snodes);
+          }
+        }
+
+        return;
+      }
+
       if(isMouseDown){
         if(isDrawing){
           drawingTo = screenToWorldSpace(canvas, { x: offset[0], y: offset[1], scale }, e.clientX - 10 * scale, e.clientY - 10 * scale) as [ number, number ];
@@ -321,7 +361,7 @@ let App = () => {
       isMouseDown = false;
     }
 
-    keybinds.load(selectedNode, setSelectedNode);
+    keybinds.load(selectedNodes, setSelectedNodes);
     requestAnimationFrame(update);
 
     let unlisten_0 = await listen('hide-window', () => {
@@ -378,8 +418,9 @@ let App = () => {
 
   return (
     <>
+      <ConfirmationPopup />
       <TabMenu />
-      <ControlBar node={selectedNode} lockMovement={( lock ) => lockMovement = lock} />
+      <ControlBar node={selectedNodes} lockMovement={( lock ) => lockMovement = lock} />
       <canvas ref={canvas}/>
     </>
   );

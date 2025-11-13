@@ -4,7 +4,7 @@ import { Node } from "./structs/node";
 
 let isKeyDown: any = {};
 
-export let load = ( selectedNode: Accessor<Node | null>, setSelectedNode: Setter<Node | null> ) => {
+export let load = ( selectedNode: Accessor<Node[]>, setSelectedNode: Setter<Node[]> ) => {
   // TODO: Copy / paste
   // TODO: Add undo / redo -ing
 
@@ -15,23 +15,24 @@ export let load = ( selectedNode: Accessor<Node | null>, setSelectedNode: Setter
 
     switch(e.key){
       case 'Delete':
-        let node = selectedNode();
-        if(!node)return;
-
-        node.inputs.map(input => {
-          input.connections.map(partner => {
-            partner.connections = partner.connections.filter(x => x != input);
+        let nodes = selectedNode();
+        for(let node of nodes){
+          node.inputs.map(input => {
+            input.connections.map(partner => {
+              partner.connections = partner.connections.filter(x => x != input);
+            })
           })
-        })
 
-        node.outputs.map(output => {
-          output.connections.map(partner => {
-            partner.connections = partner.connections.filter(x => x != output);
+          node.outputs.map(output => {
+            output.connections.map(partner => {
+              partner.connections = partner.connections.filter(x => x != output);
+            })
           })
-        })
 
-        setSelectedNode(null);
-        NodeManager.Instance.RemoveNode(node);
+          NodeManager.Instance.RemoveNode(node);
+        }
+
+        setSelectedNode([]);
         break;
       case 's':
         if(e.ctrlKey){
