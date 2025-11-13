@@ -7,7 +7,6 @@ export interface ParameterListProps{
   changed: ( value: { type: string, desc: string }[] ) => void
 }
 
-// TODO: An actual parameter list
 export let ParameterList = ( props: ParameterListProps ) => {
   let [ parameters, setParameters ] = createSignal<{ type: string, desc: string }[]>(props.value, { equals: false });
   let [ addParametersOpen, setAddParametersOpen ] = createSignal(false);
@@ -23,7 +22,18 @@ export let ParameterList = ( props: ParameterListProps ) => {
         </div>
         <div class="parameter-list-content">
           <For each={parameters()}>
-            { i => <div>{ JSON.stringify(i) }</div>}
+            { ( i, index ) => <div style={{ display: 'flex' }}>
+              <div class="parameter-list-parameter">{ i.desc === "" ? i.type : i.desc + ` ${i.type}` }</div>
+              <div class="parameter-list-parameter parameter-list-parameter-delete" onClick={() => {
+                let params = parameters();
+                params.splice(index(), 1);
+
+                setParameters(params);
+                props.changed(params);
+              }}>
+                <img src="/assets/icons/trash-can-solid-full.svg" width="20" />
+              </div>
+            </div>}
           </For>
           <div class="button" onClick={() => { setAddParametersOpen(!addParametersOpen()) }}>Add Parameter + </div>
           <Show when={addParametersOpen()}>

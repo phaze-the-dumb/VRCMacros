@@ -5,7 +5,6 @@ import { Node } from "./structs/node";
 let isKeyDown: any = {};
 
 export let load = ( selectedNode: Accessor<Node | null>, setSelectedNode: Setter<Node | null> ) => {
-  // TODO: Keybind system
   // TODO: Copy / paste
   // TODO: Add undo / redo -ing
 

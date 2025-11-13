@@ -12,6 +12,8 @@ mod structs;
 mod utils;
 mod runtime;
 
+// TODO: Add built-in OSC endpoints
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[tokio::main]
 pub async fn run() {

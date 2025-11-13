@@ -10,9 +10,9 @@ import { NodeContextMenu } from "./ContextMenu/Node";
 import { ContextMenu } from "./structs/ContextMenu";
 import { NodeManager } from "./Mangers/NodeManager";
 import { TabMenu } from "./components/TabMenu";
-import { ConfirmationPopup } from "./components/ConfirmationPopup";
 
 import * as keybinds from './keybinds';
+import { listen } from "@tauri-apps/api/event";
 
 let App = () => {
   let [ selectedNode, setSelectedNode ] = createSignal<Node | null>(null);
@@ -56,7 +56,7 @@ let App = () => {
     visible: false
   }
 
-  onMount(() => {
+  onMount(async () => {
     NodeManager.Instance.HookTabChange(() => setSelectedNode(null));
 
     ctx = canvas.getContext('2d')!;
@@ -323,11 +323,26 @@ let App = () => {
 
     keybinds.load(selectedNode, setSelectedNode);
     requestAnimationFrame(update);
+
+    let unlisten_0 = await listen('hide-window', () => {
+      stopRender = true;
+    })
+
+    let unlisten_1 = await listen('show-window', () => {
+      if(stopRender)window.location.reload();
+    })
+
+    onCleanup(() => {
+      stopRender = true;
+      window.clearInterval(interval);
+
+      unlisten_0();
+      unlisten_1();
+    });
   });
 
-  let update = () => { // TODO: Start/Stop render when app is minimised
+  let update = () => {
     if(stopRender)return;
-
     scale = lerp(scale, targetScale, 0.25);
 
     offset[0] = lerp(offset[0], offsetTarget[0], 0.5);
@@ -361,14 +376,8 @@ let App = () => {
     }
   }, 1000);
 
-  onCleanup(() => {
-    stopRender = true;
-    window.clearInterval(interval);
-  });
-
   return (
     <>
-      <ConfirmationPopup />
       <TabMenu />
       <ControlBar node={selectedNode} lockMovement={( lock ) => lockMovement = lock} />
       <canvas ref={canvas}/>
