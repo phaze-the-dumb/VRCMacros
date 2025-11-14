@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount } from "solid-js";
+import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import "./App.css";
 import { renderBackgroundGrid, renderContextMenu, renderNodes, renderNullTab, renderTempDrawing } from "./renderer";
 import { lerp } from "./utils/lerp";
@@ -10,13 +10,13 @@ import { NodeContextMenu } from "./ContextMenu/Node";
 import { ContextMenu } from "./structs/ContextMenu";
 import { NodeManager } from "./Mangers/NodeManager";
 import { TabMenu } from "./components/TabMenu";
+import { ConfirmationPopup } from "./components/ConfirmationPopup";
 
 import * as keybinds from './keybinds';
 import { listen } from "@tauri-apps/api/event";
-import { ConfirmationPopup } from "./components/ConfirmationPopup";
 
 let App = () => {
-  let [ selectedNodes, setSelectedNodes ] = createSignal<Node[]>([]);
+  let [ selectedNodes, setSelectedNodes ] = createSignal<Node[]>([], { equals: false });
 
   let canvas!: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
@@ -56,6 +56,16 @@ let App = () => {
     size: [ 0, 0 ],
     visible: false
   }
+
+  createEffect(() => {
+    let snodes = selectedNodes();
+
+    let anodes = NodeManager.Instance.GetNodes();
+    if(!anodes)return;
+
+    for(let node of anodes)node.selected = false;
+    for(let node of snodes)node.selected = true;
+  })
 
   onMount(async () => {
     NodeManager.Instance.HookTabChange(() => setSelectedNodes([]));
@@ -110,7 +120,10 @@ let App = () => {
       contextMenu.visible = true;
     }
 
+    let isShiftClick = false;
     canvas.onmousedown = ( e ) => {
+      isShiftClick = e.shiftKey;
+
       if(
         e.clientY < 60 ||
         e.clientX < 220 ||
@@ -156,8 +169,6 @@ let App = () => {
 
       if(nodes){
         nodes.map(node => {
-          if(!e.shiftKey)node.selected = false;
-
           if(isPointInRectApplyOffset(canvas, { x: offset[0], y: offset[1], scale },
             e.clientX, e.clientY,
             node.x - 20, node.y, node.w + 40, node.h
@@ -216,27 +227,9 @@ let App = () => {
 
       movingNode = clickedNode;
 
-      if(!e.shiftKey){
-        if(clickedNode){
-          clickedNode.selected = true;
-          setSelectedNodes([ clickedNode ]);
-        } else{
-          setSelectedNodes([]);
-        }
-      } else{
-        clickedNode.selected = true;
-
-        let snodes = selectedNodes();
-        if(!snodes.find(x => x.id === clickedNode!.id)){
-          snodes.push(clickedNode);
-          clickedNode.selected = true;
-
-          setSelectedNodes(snodes);
-        }
-      }
-
       isMouseDown = true;
       mouseStartPos = [ e.clientX, e.clientY ];
+      mouseMovePos = [ e.clientX, e.clientY ];
     }
 
     canvas.onmousemove = ( e ) => {
@@ -262,26 +255,33 @@ let App = () => {
             snodes.push(hoveredNode);
 
             // @ts-ignore
-            hoveredNode.selected = true;
+            hoveredNode.x = Math.round(hoveredNode.x / 10) * 10;
+            // @ts-ignore
+            hoveredNode.y = Math.round(hoveredNode.y / 10) * 10;
+
             setSelectedNodes(snodes);
           }
         }
 
         return;
-      }
+      } else if(isShiftClick)return;
 
       if(isMouseDown){
         if(isDrawing){
           drawingTo = screenToWorldSpace(canvas, { x: offset[0], y: offset[1], scale }, e.clientX - 10 * scale, e.clientY - 10 * scale) as [ number, number ];
         } else if(movingNode){
-          movingNode.x = movingNode.x - (mouseStartPos[0] - e.clientX) / scale;
-          movingNode.y = movingNode.y - (mouseStartPos[1] - e.clientY) / scale;
+          let nodes = selectedNodes();
 
-          mouseStartPos = [ e.clientX, e.clientY ];
+          for(let node of nodes){
+            node.x = node.x - (mouseMovePos[0] - e.clientX) / scale;
+            node.y = node.y - (mouseMovePos[1] - e.clientY) / scale;
+          }
+
+          mouseMovePos = [ e.clientX, e.clientY ];
           NodeManager.Instance.UpdateConfig();
         } else{
-          offsetTarget = [ offsetTarget[0] - (mouseStartPos[0] - e.clientX) / scale, offsetTarget[1] - (mouseStartPos[1] - e.clientY) / scale ];
-          mouseStartPos = [ e.clientX, e.clientY ];
+          offsetTarget = [ offsetTarget[0] - (mouseMovePos[0] - e.clientX) / scale, offsetTarget[1] - (mouseMovePos[1] - e.clientY) / scale ];
+          mouseMovePos = [ e.clientX, e.clientY ];
 
           screenMoved = true;
         }
@@ -325,36 +325,74 @@ let App = () => {
 
     canvas.onmouseup = ( e ) => {
       let nodes = NodeManager.Instance.GetNodes();
+      let clickedNode;
 
       if(nodes){
         nodes.map(node => {
-          node.inputs.map(( input, i ) => {
-            if(isPointInRectApplyOffset(canvas, { x: offset[0], y: offset[1], scale },
-              e.clientX, e.clientY,
-              node.x - 10,
-              node.y + 50 + (30 * i),
-              20, 20
-            )){
-              if(isDrawing){
-                let fromType = NodeIOResolveAnyTypes(drawingFrom!);
-                let toType = NodeIOResolveAnyTypes(input);
+          if(isPointInRectApplyOffset(canvas, { x: offset[0], y: offset[1], scale },
+            e.clientX, e.clientY,
+            node.x - 20, node.y, node.w + 40, node.h
+          )){
+            clickedNode = node;
 
-                if(
-                  drawingFrom!.connections.indexOf(input) === -1 &&
-                  (
-                    toType === null ||
-                    NodeIOCanCast(fromType, toType)
-                  )
-                ){
-                  drawingFrom!.connections.push(input);
-                  input.connections.push(drawingFrom!);
+            node.inputs.map(( input, i ) => {
+              if(isPointInRectApplyOffset(canvas, { x: offset[0], y: offset[1], scale },
+                e.clientX, e.clientY,
+                node.x - 10,
+                node.y + 50 + (30 * i),
+                20, 20
+              )){
+                if(isDrawing){
+                  let fromType = NodeIOResolveAnyTypes(drawingFrom!);
+                  let toType = NodeIOResolveAnyTypes(input);
 
-                  NodeManager.Instance.UpdateConfig();
+                  if(
+                    drawingFrom!.connections.indexOf(input) === -1 &&
+                    (
+                      toType === null ||
+                      NodeIOCanCast(fromType, toType)
+                    )
+                  ){
+                    drawingFrom!.connections.push(input);
+                    input.connections.push(drawingFrom!);
+
+                    NodeManager.Instance.UpdateConfig();
+                  }
                 }
               }
-            }
-          })
+            })
+          }
         })
+      }
+
+      let diffX = mouseStartPos[0] - e.clientX;
+      let diffY = mouseStartPos[1] - e.clientY;
+
+      let dist = Math.sqrt(diffX * diffX + diffY * diffY);
+
+      if(dist < 10){
+        if(clickedNode){
+          if(e.shiftKey){
+            let snodes = selectedNodes();
+            if(snodes.indexOf(clickedNode) === -1)snodes.push(clickedNode);
+
+            // @ts-ignore
+            clickedNode.x = Math.round(clickedNode.x / 10) * 10;
+            // @ts-ignore
+            clickedNode.y = Math.round(clickedNode.y / 10) * 10;
+
+            setSelectedNodes(snodes);
+          } else{
+            // @ts-ignore
+            clickedNode.x = Math.round(clickedNode.x / 10) * 10;
+            // @ts-ignore
+            clickedNode.y = Math.round(clickedNode.y / 10) * 10;
+
+            setSelectedNodes([ clickedNode ]);
+          }
+        } else {
+          setSelectedNodes([]);
+        }
       }
 
       isDrawing = false;
@@ -407,6 +445,7 @@ let App = () => {
 
   let isMouseDown = false;
   let mouseStartPos = [ 0, 0 ];
+  let mouseMovePos = [ 0, 0 ];
 
   let interval = setInterval(() => {
     if(screenMoved){

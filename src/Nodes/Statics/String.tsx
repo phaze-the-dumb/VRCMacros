@@ -7,7 +7,7 @@ export let NodeStaticsString: NodeDefinition = {
   typeId: 'staticstring',
 
   w: 200,
-  h: 85,
+  h: 80,
 
   statics: [{
     type: NodeType.String,

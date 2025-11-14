@@ -1,6 +1,6 @@
 import './ControlBar.css';
 
-import { Accessor, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
+import { Accessor, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { Node, NodeType } from '../structs/node';
 import { TextInput } from './TextInput';
 import { invoke } from '@tauri-apps/api/core';
@@ -14,10 +14,6 @@ export interface ControlBarProps{
 }
 
 export let ControlBar = ( props: ControlBarProps ) => {
-  createEffect(() => {
-    console.log(props.node());
-  })
-
   return (
     <div class="control-bar">
       <For each={props.node()[0]?.statics}>

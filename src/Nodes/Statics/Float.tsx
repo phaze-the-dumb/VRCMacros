@@ -7,7 +7,7 @@ export let NodeStaticsFloat: NodeDefinition = {
   typeId: 'staticfloat',
 
   w: 200,
-  h: 85,
+  h: 80,
 
   statics: [{
     type: NodeType.Float,
