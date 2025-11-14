@@ -1,3 +1,3 @@
-pub mod iftrue;
-pub mod iffalse;
 pub mod ifequal;
+pub mod iffalse;
+pub mod iftrue;

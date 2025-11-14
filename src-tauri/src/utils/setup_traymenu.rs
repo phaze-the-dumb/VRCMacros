@@ -1,6 +1,10 @@
-use tauri::{ AppHandle, Emitter, Manager, menu::{ MenuBuilder, MenuItemBuilder }, tray::TrayIconBuilder };
+use tauri::{
+  menu::{MenuBuilder, MenuItemBuilder},
+  tray::TrayIconBuilder,
+  AppHandle, Emitter, Manager,
+};
 
-pub fn setup_traymenu( handle: &AppHandle ) {
+pub fn setup_traymenu(handle: &AppHandle) {
   // Setup the tray icon and menu buttons
   let quit = MenuItemBuilder::new("Quit")
     .id("quit")

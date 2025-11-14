@@ -1,17 +1,16 @@
 import { Accessor, Setter } from "solid-js";
 import { NodeManager } from "./Mangers/NodeManager";
 import { Node } from "./structs/node";
+import { readText, writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { decodeNodeList, encodeNodeList } from "./utils/clipboard";
 
 let isKeyDown: any = {};
 
-export let load = ( selectedNode: Accessor<Node[]>, setSelectedNode: Setter<Node[]> ) => {
-  // TODO: Copy / paste
+export let load = ( mousePos: Accessor<[ number, number ]>, selectedNode: Accessor<Node[]>, setSelectedNode: Setter<Node[]> ) => {
   // TODO: Add undo / redo -ing
 
-  window.onkeydown = ( e ) => {
+  window.onkeydown = async ( e ) => {
     isKeyDown[e.key] = true;
-
-    console.log(e.key);
 
     switch(e.key){
       case 'Delete':
@@ -50,6 +49,25 @@ export let load = ( selectedNode: Accessor<Node[]>, setSelectedNode: Setter<Node
 
           // Save
           NodeManager.Instance.SaveTab(currentTab, true);
+        }
+        break;
+      case 'c':
+        if(e.ctrlKey){
+          let nodes = selectedNode();
+          await writeText(encodeNodeList(nodes, mousePos()));
+        }
+        break;
+      case 'v':
+        if(e.ctrlKey){
+          let text = await readText();
+
+          let nodes = await decodeNodeList(text, mousePos());
+          if(!nodes)return;
+
+          for(let node of nodes)
+            NodeManager.Instance.AddNode(node);
+
+          setSelectedNode(nodes);
         }
         break;
     }

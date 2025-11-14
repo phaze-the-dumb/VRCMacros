@@ -1,16 +1,16 @@
-use std::{ fs, sync::Mutex };
+use std::{fs, sync::Mutex};
 
 use crossbeam_channel::bounded;
 use frontend_calls::*;
 
-use crate::{ osc::OSCMessage, setup::setup, utils::config::Config };
+use crate::{osc::OSCMessage, setup::setup, utils::config::Config};
 
 mod frontend_calls;
 mod osc;
+mod runtime;
 mod setup;
 mod structs;
 mod utils;
-mod runtime;
 
 // TODO: Add built-in OSC endpoints
 
@@ -35,9 +35,10 @@ pub async fn run() {
 
   static ADDRESSES: Mutex<Vec<OSCMessage>> = Mutex::new(Vec::new());
 
-  let ( runtime_sender, runtime_receiver ) = bounded(1024);
+  let (runtime_sender, runtime_receiver) = bounded(1024);
 
   tauri::Builder::default()
+    .plugin(tauri_plugin_clipboard_manager::init())
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_opener::init())
     .invoke_handler(tauri::generate_handler![
@@ -47,7 +48,6 @@ pub async fn run() {
       sync_tab::discard_tab,
       load_previous_tabs::load_previous_tabs,
       close_app::close_app,
-
       settings::set_hide_editor_on_app_start,
       settings::get_hide_editor_on_app_start,
     ])

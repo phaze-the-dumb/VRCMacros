@@ -17,6 +17,7 @@ import { listen } from "@tauri-apps/api/event";
 
 let App = () => {
   let [ selectedNodes, setSelectedNodes ] = createSignal<Node[]>([], { equals: false });
+  let [ mousePos, setMousePos ] = createSignal<[ number, number ]>([ 0, 0 ]);
 
   let canvas!: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
@@ -233,6 +234,8 @@ let App = () => {
     }
 
     canvas.onmousemove = ( e ) => {
+      setMousePos([ e.clientX, e.clientY ]);
+
       if(e.shiftKey && isMouseDown){
         let nodes = NodeManager.Instance.GetNodes();
         let hoveredNode: Node | null = null;
@@ -399,7 +402,7 @@ let App = () => {
       isMouseDown = false;
     }
 
-    keybinds.load(selectedNodes, setSelectedNodes);
+    keybinds.load(mousePos, selectedNodes, setSelectedNodes);
     requestAnimationFrame(update);
 
     let unlisten_0 = await listen('hide-window', () => {

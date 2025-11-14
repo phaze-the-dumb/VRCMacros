@@ -1,17 +1,23 @@
-use std::{ collections::HashMap, fs::File, io::{ Read, Write }, path::PathBuf, sync::Mutex };
+use std::{
+  collections::HashMap,
+  fs::File,
+  io::{Read, Write},
+  path::PathBuf,
+  sync::Mutex,
+};
 
-use flate2::{ read::GzDecoder, write::GzEncoder, Compression };
-use serde::{ Deserialize, Serialize };
+use flate2::{read::GzDecoder, write::GzEncoder, Compression};
+use serde::{Deserialize, Serialize};
 
 use crate::structs::nodes::Node;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct ConfigValues{
+pub struct ConfigValues {
   #[serde(default)]
-  pub loaded_tabs: HashMap<String, ( Vec<Node>, String, Option<String> )>,
+  pub loaded_tabs: HashMap<String, (Vec<Node>, String, Option<String>)>,
 
   #[serde(default)]
-  pub hide_editor_on_start: bool
+  pub hide_editor_on_start: bool,
 }
 
 pub struct Config {
