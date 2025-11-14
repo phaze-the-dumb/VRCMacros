@@ -70,6 +70,16 @@ export let load = ( mousePos: Accessor<[ number, number ]>, selectedNode: Access
           setSelectedNode(nodes);
         }
         break;
+      case 'z':
+        if(e.ctrlKey){
+          console.log('undo');
+        }
+        break;
+      case 'y':
+        if(e.ctrlKey){
+          console.log('redo');
+        }
+        break;
     }
   }
 
