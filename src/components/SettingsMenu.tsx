@@ -6,6 +6,9 @@ export interface SettingsMenuProps{
 }
 
 export let SettingsMenu = ( props: SettingsMenuProps ) => {
+  // TODO: Changable OSC Ports
+  // TODO: Changable keybinds
+
   return (
     <>
       <div class="settings-menu">

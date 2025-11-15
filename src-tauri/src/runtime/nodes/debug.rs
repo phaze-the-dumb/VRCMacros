@@ -22,7 +22,7 @@ impl RuntimeNode for Debug {
   }
 
   fn execute(&mut self) -> Option<Vec<ParameterType>> {
-    dbg!(&self.to_log);
+    dbg!(&self.to_log); // TODO: Debug to actual UI instead of console
     self.to_log = None;
 
     None

@@ -86,6 +86,9 @@ pub fn setup(
     }
   });
 
+  // TODO: Run tabs in seperate threads
+  // TODO: Support multiple flow inputs on a node
+
   tokio::spawn(async move {
     let mut tabs: HashMap<String, RuntimeNodeTree> = HashMap::new();
 

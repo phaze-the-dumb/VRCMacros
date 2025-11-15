@@ -13,6 +13,7 @@ mod structs;
 mod utils;
 
 // TODO: Add built-in OSC endpoints
+// TODO: Read avatar paramaters from file
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[tokio::main]

@@ -25,6 +25,14 @@ export interface NodeDefinitionHashMap {
   [details: string] : NodeDefinition;
 }
 
+// TODO: (Node Additions) Pressing keyboard keys
+// TODO: (Node Additions) Getting media state from os
+// TODO: (Node Additions) Sending custom OSC messages
+// TODO: (Node Additions) Sending HTTP requests?
+// TODO: (Node Additions) Voicemeeter integrations (win only)
+// TODO: (Node Additions) Voicemod integrations (win only)
+// TODO: (Node Additions) Executing shell commands? (probably need some kinda popup warning when these are imported about dangerous usage)
+
 export let Nodes: NodeDefinition[] = [
   NodeOSCTrigger,
   NodeConditional,
