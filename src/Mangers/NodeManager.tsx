@@ -7,6 +7,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { NodesByID } from "../Nodes/Nodes";
 import { save } from "@tauri-apps/plugin-dialog";
 import { ConfirmationManager } from "./ConfirmationManager";
+import { platform } from "@tauri-apps/plugin-os";
 
 export interface TabHashMap {
   [details: string] : Tab;
@@ -45,6 +46,8 @@ export class NodeManager{
           graph: tab[1][0]
         }));
       };
+
+      this.UpdateConfig();
     });
 
     listen('prompt_to_close', async _ => {
@@ -384,6 +387,7 @@ export class NodeManager{
     invoke('save_graph', { graph: JSON.stringify({
       tab_name: tab.name,
       version: await getVersion(),
+      platform: platform(),
       graph: nodesToSave
     }), path });
   }

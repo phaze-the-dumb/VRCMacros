@@ -2,6 +2,8 @@ import { Node, NodeType } from "../../structs/node";
 import { NodeDefinition } from "../Nodes";
 
 export let NodeOSCActionsSendChatbox: NodeDefinition = {
+  os: 'any',
+
   isSingle: true,
   name: 'Send Chatbox',
   typeId: 'oscsendchatbox',

@@ -1,23 +1,32 @@
-use std::collections::HashMap;
+use std::{
+  collections::HashMap,
+  sync::{Arc, Mutex},
+};
+
+#[cfg(target_os = "windows")]
+use enigo::Enigo;
 
 use crate::{
   runtime::nodes::{
     conditional::{
       ifequal::ConditionalIfEqual, iffalse::ConditionalIfFalse, iftrue::ConditionalIfTrue,
-    },
-    debug::Debug,
-    oscactions::sendchatbox::OSCActionsSendChatbox,
-    osctrigger::OSCTrigger,
-    statics::{float::StaticFloat, int::StaticInt, string::StaticString},
+    }, debug::Debug, oscactions::sendchatbox::OSCActionsSendChatbox, osctrigger::OSCTrigger, shell::ShellCommand, statics::{float::StaticFloat, int::StaticInt, string::StaticString}
   },
   structs::{nodes::Node, parameter_types::ParameterType},
 };
+
+#[cfg(target_os = "windows")]
+use crate::runtime::nodes::press_key::PressKey;
 
 mod conditional;
 mod debug;
 mod oscactions;
 mod osctrigger;
 mod statics;
+mod shell;
+
+#[cfg(target_os = "windows")]
+mod press_key;
 
 pub struct RuntimeNodeTree {
   pub nodes: HashMap<String, Box<dyn RuntimeNode>>,
@@ -26,7 +35,7 @@ pub struct RuntimeNodeTree {
 unsafe impl Send for RuntimeNodeTree {}
 
 impl RuntimeNodeTree {
-  pub fn from(tree: Vec<Node>) -> Self {
+  pub fn from(tree: Vec<Node>, #[cfg(target_os = "windows")] enigo: Arc<Mutex<Enigo>>) -> Self {
     let mut runtime_nodes: HashMap<String, Box<dyn RuntimeNode>> = HashMap::new();
     for node in tree {
       match node.type_id.as_str() {
@@ -61,6 +70,16 @@ impl RuntimeNodeTree {
         "debug" => {
           runtime_nodes.insert(node.id.clone(), Debug::new(node));
         }
+
+        #[cfg(target_os = "windows")]
+        "presskey" => {
+          runtime_nodes.insert(node.id.clone(), PressKey::new(node, enigo.clone()));
+        }
+
+        "shellcommand" => {
+          runtime_nodes.insert(node.id.clone(), ShellCommand::new(node));
+        }
+
         _ => {}
       }
     }

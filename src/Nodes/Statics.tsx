@@ -5,6 +5,8 @@ import { NodeStaticsInt } from "./Statics/Int";
 import { NodeStaticsString } from "./Statics/String";
 
 export let NodeStatics: NodeDefinition = {
+  os: 'any',
+
   isSingle: false,
   name: 'Statics',
   items: [

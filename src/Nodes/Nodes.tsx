@@ -1,12 +1,16 @@
 import { Node, NodeStatic, NodeType } from "../structs/node";
+import { platform } from '@tauri-apps/plugin-os';
 
 import { NodeConditional } from "./Conditional";
 import { NodeDebug } from "./Debug";
 import { NodeOSCActions } from "./OSCActions";
 import { NodeOSCTrigger } from "./OSCTrigger";
+import { NodePressKey } from "./PressKey";
 import { NodeStatics } from "./Statics";
+import { NodeShellCommand } from "./Shell";
 
 export interface NodeDefinition{
+  os: string,
   isSingle: boolean,
   name: string,
   typeId?: string,
@@ -33,13 +37,23 @@ export interface NodeDefinitionHashMap {
 // TODO: (Node Additions) Voicemod integrations (win only)
 // TODO: (Node Additions) Executing shell commands? (probably need some kinda popup warning when these are imported about dangerous usage)
 
-export let Nodes: NodeDefinition[] = [
+export let Nodes: NodeDefinition[] = [];
+let nodes = [
   NodeOSCTrigger,
   NodeConditional,
   NodeStatics,
   NodeOSCActions,
-  NodeDebug
+  NodeDebug,
+  NodePressKey,
+  NodeShellCommand
 ]
+
+let os = platform();
+
+for (let i = 0; i < nodes.length; i++) {
+  let node = nodes[i];
+  if(node.os === 'any' || node.os === os)Nodes.push(node);
+}
 
 export let NodesByID: NodeDefinitionHashMap = {}
 

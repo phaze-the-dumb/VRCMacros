@@ -1,12 +1,12 @@
 .settings-menu{
-  position: fixed;
-  z-index: 110;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.75);
-}
+   position: fixed;
+   z-index: 110;
+   top: 0;
+   left: 0;
+   width: 100vw;
+   height: 100vh;
+   background: rgba(0, 0, 0, 0.75);
+ }
 
 .settings-menu-inner{
   position: fixed;

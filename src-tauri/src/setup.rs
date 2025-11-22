@@ -1,5 +1,10 @@
 use crossbeam_channel::{bounded, Receiver};
-use std::{collections::HashMap, fs::File, io::Read, sync::Mutex};
+use std::{
+  collections::HashMap,
+  fs::File,
+  io::Read,
+  sync::{Arc, Mutex},
+};
 
 use flate2::read::GzDecoder;
 use serde_json::{Map, Value};
@@ -86,11 +91,14 @@ pub fn setup(
     }
   });
 
-  // TODO: Run tabs in seperate threads
+  // TODO: Run tabs in seperate threads (really not looking forward to this... thanks rust)
   // TODO: Support multiple flow inputs on a node
 
   tokio::spawn(async move {
     let mut tabs: HashMap<String, RuntimeNodeTree> = HashMap::new();
+
+    #[cfg(target_os = "windows")]
+    let enigo = Arc::new(Mutex::new(Enigo::new(&Settings::default()).unwrap()));
 
     loop {
       let cmd = runtime_receiver.recv().unwrap();
@@ -125,6 +133,10 @@ pub fn setup(
         }
 
         RuntimeCommand::AddTab(graph, id) => {
+          #[cfg(target_os = "windows")]
+          tabs.insert(id, RuntimeNodeTree::from(graph, enigo.clone()));
+
+          #[cfg(target_os = "linux")]
           tabs.insert(id, RuntimeNodeTree::from(graph));
         }
         RuntimeCommand::RemoveTab(id) => {

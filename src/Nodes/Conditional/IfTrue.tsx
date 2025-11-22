@@ -2,12 +2,14 @@ import { Node, NodeType } from "../../structs/node";
 import { NodeDefinition } from "../Nodes";
 
 export let NodeConditionalIfTrue: NodeDefinition = {
+  os: 'any',
+
   isSingle: true,
   name: 'If True',
   typeId: 'iftrue',
 
   w: 220,
-  h: 150,
+  h: 120,
 
   statics: [{
     type: NodeType.Label,

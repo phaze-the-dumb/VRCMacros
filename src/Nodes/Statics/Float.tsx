@@ -2,6 +2,8 @@ import { Node, NodeType } from "../../structs/node";
 import { NodeDefinition } from "../Nodes";
 
 export let NodeStaticsFloat: NodeDefinition = {
+  os: 'any',
+
   isSingle: true,
   name: 'Float',
   typeId: 'staticfloat',

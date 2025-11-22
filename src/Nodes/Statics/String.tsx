@@ -2,6 +2,8 @@ import { Node, NodeType } from "../../structs/node";
 import { NodeDefinition } from "../Nodes";
 
 export let NodeStaticsString: NodeDefinition = {
+  os: 'any',
+
   isSingle: true,
   name: 'String',
   typeId: 'staticstring',

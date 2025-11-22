@@ -29,4 +29,8 @@ flate2 = "1.1"
 tauri-plugin-dialog = "2"
 crossbeam-channel = "0.5"
 tauri-plugin-clipboard-manager = "2"
+tauri-plugin-os = "2"
+
+[target.'cfg(windows)'.dependencies]
+enigo = { version = "0.6.1" }
 

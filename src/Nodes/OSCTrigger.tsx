@@ -5,6 +5,8 @@ import { NodeManager } from "../Mangers/NodeManager";
 import { NodeDefinition } from "./Nodes";
 
 export let NodeOSCTrigger: NodeDefinition = {
+  os: 'any',
+
   isSingle: true,
   name: 'OSC Trigger',
   typeId: 'osctrigger',
