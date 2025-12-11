@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use anyhow::{bail, Result};
 
 use crate::{runtime::nodes::RuntimeNodeTree, structs::parameter_types::ParameterType};
@@ -5,46 +7,41 @@ use crate::{runtime::nodes::RuntimeNodeTree, structs::parameter_types::Parameter
 pub mod commands;
 pub mod nodes;
 
-// This is horrible. I know, I'm sorry.
-
 // TODO: Variables
 
-pub fn runtime_dry(
-  entry: String,
-  parameters: &Vec<ParameterType>,
-  tab: &mut RuntimeNodeTree,
-) -> Result<()> {
-  let node = tab.nodes.get_mut(&entry);
-  if node.is_none() {
-    bail!("Cannot find node");
+pub fn recurse_runtime(entry: String, tab: &mut RuntimeNodeTree, args: Vec<ParameterType>) -> Result<()>{
+  let ( out_args, output_map ) = runtime(entry, tab, args)?;
+
+  let mut next_node_args: HashMap<String, Vec<ParameterType>> = HashMap::new();
+
+  for i in 0..out_args.len(){
+    let links = &output_map[i];
+
+    for ( id, link_index, _ ) in links{
+      let link_index = link_index.clone() as usize;
+
+      if next_node_args.contains_key(id){
+        let args: &mut _ = next_node_args.get_mut(id).unwrap();
+        while args.len() < link_index{ args.push(ParameterType::None); }
+
+        args.push(out_args[i].clone());
+      } else{
+        let mut args = vec![ParameterType::None; link_index];
+        args.push(out_args[i].clone());
+
+        next_node_args.insert(id.clone(), args);
+      }
+    }
   }
 
-  let node = node.unwrap();
+  for i in 0..out_args.len(){
+    if let ParameterType::Flow(next) = out_args[i]{
+      if next{
+        let links = &output_map[i];
 
-  let output_map = node.outputs();
-  let args = node.execute_dry(parameters);
-
-  if args.is_some() {
-    let args = args.unwrap();
-
-    for i in 0..args.len() {
-      let arg = &args[i];
-
-      for output in &output_map[i] {
-        if output.2 == 5 {
-          break;
-        } // Ignore flow outputs
-
-        let next_node = tab.nodes.get_mut(&output.0);
-        if next_node.is_none() {
-          bail!("Cannot find node {}", output.0)
-        }
-
-        let next_node = next_node.unwrap();
-        let can_update = next_node.update_arg(output.1 as usize, arg.clone());
-
-        if can_update {
-          runtime_dry(output.0.clone(), &vec![], tab)?;
+        for ( id, _, _ ) in links{
+          let args = next_node_args.remove(id).unwrap();
+          recurse_runtime(id.clone(), tab, args)?;
         }
       }
     }
@@ -53,36 +50,52 @@ pub fn runtime_dry(
   Ok(())
 }
 
-pub fn runtime(entry: String, tab: &mut RuntimeNodeTree) -> Result<()> {
+pub fn runtime(entry: String, tab: &mut RuntimeNodeTree, mut args: Vec<ParameterType>) -> Result<(Vec<ParameterType>, Vec<Vec<(String, isize, isize)>>)> {
   let node = tab.nodes.get_mut(&entry);
-  if node.is_none() {
-    bail!("Cannot find node");
-  }
+  if node.is_none() { bail!("Cannot find node"); }
 
   let node = node.unwrap();
 
-  let next = node.execute();
-  if next.is_some() {
-    let next = next.unwrap();
+  let inputs = node.inputs();
+  dbg!(&inputs);
 
-    let outputs = node.outputs();
+  let mut needed_input_nodes = HashMap::new();
 
-    for i in 0..next.len() {
-      let arg = &next[i];
-      if i >= outputs.len() {
-        break;
-      }
-
-      for output in &outputs[i] {
-        if let ParameterType::Flow(next) = arg {
-          if *next {
-            // This is a flow output, continue
-            runtime(output.0.clone(), tab)?;
-          }
+  for i in 0..inputs.len(){
+    if i >= args.len() || args[i] == ParameterType::None{
+      if let Some(input) = &inputs[i]{
+        if !needed_input_nodes.contains_key(&input.0){
+          needed_input_nodes.insert(input.0.clone(), vec![(input.1.clone(), i.clone())]);
+        } else{
+          needed_input_nodes.get_mut(&input.0).unwrap().push((input.1.clone(), i.clone()));
         }
       }
     }
   }
 
-  Ok(())
+  dbg!(&needed_input_nodes);
+
+  for ( id, needed ) in needed_input_nodes{
+    let (out_args, _) = runtime(id, tab, vec![]).unwrap();
+    // TODO: Combine output with args
+
+    for ( output, input ) in needed{
+      let arg = &out_args[output as usize];
+
+      if args.len() >= input{
+        while args.len() < input{ args.push(ParameterType::None); }
+        args.push(arg.clone());
+      } else{
+        args[input] = arg.clone();
+      }
+    }
+  }
+
+  let node = tab.nodes.get_mut(&entry); // TODO: Find a way to only do this lookup once
+  if node.is_none() { bail!("Cannot find node"); }
+
+  let node = node.unwrap();
+
+  let output = node.execute(args);
+  Ok((output, node.outputs()))
 }

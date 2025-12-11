@@ -8,6 +8,9 @@ use crate::{
 };
 
 pub struct PressKey {
+  outputs: Vec<Vec<(String, isize, isize)>>,
+  inputs: Vec<Option<(String, isize, isize)>>,
+
   key: Option<char>,
   enigo: Arc<Mutex<Enigo>>,
 }
@@ -17,6 +20,19 @@ impl PressKey {
     let value = &node.statics[0].value;
 
     Box::new(Self {
+      outputs: node.outputs.iter().map(|x| {
+        x.connections.iter()
+          .map(|x| (x.node.clone(), x.index, x.value_type)).collect()}).collect(),
+
+      inputs: node.inputs.iter().map(|x| {
+        let y = x.connections.get(0);
+        if let Some(y) = y{
+          Some((y.node.clone(), y.index, y.value_type))
+        } else{
+          None
+        }
+      }).collect(),
+
       enigo,
       key: if value.is_null() {
         None
@@ -35,23 +51,20 @@ impl PressKey {
 
 impl RuntimeNode for PressKey {
   fn outputs(&self) -> Vec<Vec<(String, isize, isize)>> {
-    vec![]
-  }
-  fn execute_dry(&mut self, _: &Vec<ParameterType>) -> Option<Vec<ParameterType>> {
-    Some(vec![])
+    self.outputs.clone()
   }
 
-  fn execute(&mut self) -> Option<Vec<ParameterType>> {
+  fn inputs(&self) -> Vec<Option<(String, isize, isize)>> {
+    self.inputs.clone()
+  }
+
+  fn execute(&mut self, _: Vec<ParameterType>) -> Vec<ParameterType> {
     if self.key.is_some() {
       let mut enigo = self.enigo.lock().unwrap();
       enigo.key(Key::MediaPlayPause, Direction::Click).unwrap();
     }
 
-    None
-  }
-
-  fn update_arg(&mut self, _: usize, _: ParameterType) -> bool {
-    false
+    vec![]
   }
 
   fn is_entrypoint(&self) -> bool {

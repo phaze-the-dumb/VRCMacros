@@ -3,7 +3,7 @@ use std::{
   sync::{Arc, Mutex},
 };
 
-#[cfg(target_os = "windows")]
+// #[cfg(target_os = "windows")]
 use enigo::Enigo;
 
 use crate::{
@@ -15,7 +15,7 @@ use crate::{
   structs::{nodes::Node, parameter_types::ParameterType},
 };
 
-#[cfg(target_os = "windows")]
+// #[cfg(target_os = "windows")]
 use crate::runtime::nodes::press_key::PressKey;
 
 mod conditional;
@@ -25,7 +25,7 @@ mod osctrigger;
 mod statics;
 mod shell;
 
-#[cfg(target_os = "windows")]
+// #[cfg(target_os = "windows")]
 mod press_key;
 
 pub struct RuntimeNodeTree {
@@ -35,7 +35,7 @@ pub struct RuntimeNodeTree {
 unsafe impl Send for RuntimeNodeTree {}
 
 impl RuntimeNodeTree {
-  pub fn from(tree: Vec<Node>, #[cfg(target_os = "windows")] enigo: Arc<Mutex<Enigo>>) -> Self {
+  pub fn from(tree: Vec<Node>, /*#[cfg(target_os = "windows")]*/ enigo: Arc<Mutex<Enigo>>) -> Self {
     let mut runtime_nodes: HashMap<String, Box<dyn RuntimeNode>> = HashMap::new();
     for node in tree {
       match node.type_id.as_str() {
@@ -71,7 +71,7 @@ impl RuntimeNodeTree {
           runtime_nodes.insert(node.id.clone(), Debug::new(node));
         }
 
-        #[cfg(target_os = "windows")]
+        // #[cfg(target_os = "windows")]
         "presskey" => {
           runtime_nodes.insert(node.id.clone(), PressKey::new(node, enigo.clone()));
         }
@@ -92,8 +92,8 @@ impl RuntimeNodeTree {
 
 pub trait RuntimeNode {
   fn outputs(&self) -> Vec<Vec<(String, isize, isize)>>; // Node ID, input index, output value type
-  fn execute_dry(&mut self, msg: &Vec<ParameterType>) -> Option<Vec<ParameterType>>; // Only update values on the first loop through
-  fn execute(&mut self) -> Option<Vec<ParameterType>>; // Then call functions on the second loop
-  fn update_arg(&mut self, index: usize, value: ParameterType) -> bool;
+  fn inputs(&self) -> Vec<Option<(String, isize, isize)>>; // Node ID, input index, output value type
+
+  fn execute(&mut self, args: Vec<ParameterType>) -> Vec<ParameterType>; // Then call functions on the second loop
   fn is_entrypoint(&self) -> bool;
 }

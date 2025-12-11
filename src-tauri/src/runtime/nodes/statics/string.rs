@@ -5,6 +5,8 @@ use crate::{
 
 pub struct StaticString {
   outputs: Vec<Vec<(String, isize, isize)>>,
+  inputs: Vec<Option<(String, isize, isize)>>,
+
   value: Option<String>,
 }
 
@@ -13,21 +15,24 @@ impl StaticString {
     let value = &node.statics[0].value;
 
     Box::new(Self {
+      outputs: node.outputs.iter().map(|x| {
+        x.connections.iter()
+          .map(|x| (x.node.clone(), x.index, x.value_type)).collect()}).collect(),
+
+      inputs: node.inputs.iter().map(|x| {
+        let y = x.connections.get(0);
+        if let Some(y) = y{
+          Some((y.node.clone(), y.index, y.value_type))
+        } else{
+          None
+        }
+      }).collect(),
+
       value: if value.is_null() {
         None
       } else {
         Some(value.as_str().unwrap().to_owned())
-      },
-      outputs: node
-        .outputs
-        .iter()
-        .map(|x| {
-          x.connections
-            .iter()
-            .map(|x| (x.node.clone(), x.index, x.value_type))
-            .collect()
-        })
-        .collect(),
+      }
     })
   }
 }
@@ -37,22 +42,19 @@ impl RuntimeNode for StaticString {
     self.outputs.clone()
   }
 
-  fn execute_dry(&mut self, _: &Vec<ParameterType>) -> Option<Vec<ParameterType>> {
+  fn inputs(&self) -> Vec<Option<(String, isize, isize)>> {
+    self.inputs.clone()
+  }
+
+  fn execute(&mut self, _: Vec<ParameterType>) -> Vec<ParameterType> {
     if self.value.is_some() {
-      Some(vec![ParameterType::String(self.value.clone().unwrap())])
+      vec![ParameterType::String(self.value.clone().unwrap())]
     } else {
-      None
+      vec![ParameterType::String("".to_owned())]
     }
   }
 
-  fn execute(&mut self) -> Option<Vec<ParameterType>> {
-    None
-  }
-
-  fn update_arg(&mut self, _: usize, _: ParameterType) -> bool {
-    false
-  }
   fn is_entrypoint(&self) -> bool {
-    true
+    false
   }
 }

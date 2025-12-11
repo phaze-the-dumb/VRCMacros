@@ -5,23 +5,24 @@ use crate::{
 
 pub struct ConditionalIfFalse {
   outputs: Vec<Vec<(String, isize, isize)>>,
-  runtime_active: bool,
+  inputs: Vec<Option<(String, isize, isize)>>,
 }
 
 impl ConditionalIfFalse {
   pub fn new(node: Node) -> Box<Self> {
     Box::new(Self {
-      outputs: node
-        .outputs
-        .iter()
-        .map(|x| {
-          x.connections
-            .iter()
-            .map(|x| (x.node.clone(), x.index, x.value_type))
-            .collect()
-        })
-        .collect(),
-      runtime_active: false,
+      outputs: node.outputs.iter().map(|x| {
+        x.connections.iter()
+          .map(|x| (x.node.clone(), x.index, x.value_type)).collect()}).collect(),
+
+      inputs: node.inputs.iter().map(|x| {
+        let y = x.connections.get(0);
+        if let Some(y) = y{
+          Some((y.node.clone(), y.index, y.value_type))
+        } else{
+          None
+        }
+      }).collect(),
     })
   }
 }
@@ -30,25 +31,18 @@ impl RuntimeNode for ConditionalIfFalse {
   fn outputs(&self) -> Vec<Vec<(String, isize, isize)>> {
     self.outputs.clone()
   }
-  fn execute_dry(&mut self, _: &Vec<ParameterType>) -> Option<Vec<ParameterType>> {
-    Some(vec![])
+
+  fn inputs(&self) -> Vec<Option<(String, isize, isize)>> {
+    self.inputs.clone()
   }
 
-  fn execute(&mut self) -> Option<Vec<ParameterType>> {
-    Some(vec![
-      ParameterType::Flow(!self.runtime_active),
-      ParameterType::Flow(self.runtime_active),
-    ])
-  }
+  fn execute(&mut self, args: Vec<ParameterType>) -> Vec<ParameterType> {
+    let is_false = !args[1].as_bool().unwrap();
 
-  fn update_arg(&mut self, _: usize, arg: ParameterType) -> bool {
-    if arg.as_bool().unwrap() {
-      self.runtime_active = true;
-      true
-    } else {
-      self.runtime_active = false;
-      false
-    }
+    vec![
+      ParameterType::Flow(is_false),
+      ParameterType::Flow(!is_false),
+    ]
   }
 
   fn is_entrypoint(&self) -> bool {

@@ -5,25 +5,24 @@ use crate::{
 
 pub struct ConditionalIfEqual {
   outputs: Vec<Vec<(String, isize, isize)>>,
-  value1: ParameterType,
-  value2: ParameterType,
+  inputs: Vec<Option<(String, isize, isize)>>,
 }
 
 impl ConditionalIfEqual {
   pub fn new(node: Node) -> Box<Self> {
     Box::new(Self {
-      outputs: node
-        .outputs
-        .iter()
-        .map(|x| {
-          x.connections
-            .iter()
-            .map(|x| (x.node.clone(), x.index, x.value_type))
-            .collect()
-        })
-        .collect(),
-      value1: ParameterType::None,
-      value2: ParameterType::None,
+      outputs: node.outputs.iter().map(|x| {
+        x.connections.iter()
+          .map(|x| (x.node.clone(), x.index, x.value_type)).collect()}).collect(),
+
+      inputs: node.inputs.iter().map(|x| {
+        let y = x.connections.get(0);
+        if let Some(y) = y{
+          Some((y.node.clone(), y.index, y.value_type))
+        } else{
+          None
+        }
+      }).collect(),
     })
   }
 }
@@ -32,34 +31,18 @@ impl RuntimeNode for ConditionalIfEqual {
   fn outputs(&self) -> Vec<Vec<(String, isize, isize)>> {
     self.outputs.clone()
   }
-  fn execute_dry(&mut self, _: &Vec<ParameterType>) -> Option<Vec<ParameterType>> {
-    Some(vec![])
+
+  fn inputs(&self) -> Vec<Option<(String, isize, isize)>> {
+    self.inputs.clone()
   }
 
-  fn execute(&mut self) -> Option<Vec<ParameterType>> {
-    if self.value1 == ParameterType::None && self.value2 == ParameterType::None {
-      None
-    } else {
-      let equal = self.value1 == self.value2;
-      Some(vec![
-        ParameterType::Flow(equal),
-        ParameterType::Flow(!equal),
-      ])
-    }
-  }
+  fn execute(&mut self, args: Vec<ParameterType>) -> Vec<ParameterType> {
+    let is_equal = args[1] == args[2];
 
-  fn update_arg(&mut self, index: usize, arg: ParameterType) -> bool {
-    match index {
-      1 => {
-        self.value1 = arg;
-      }
-      2 => {
-        self.value2 = arg;
-      }
-      _ => {}
-    }
-
-    false
+    vec![
+      ParameterType::Flow(is_equal),
+      ParameterType::Flow(!is_equal),
+    ]
   }
 
   fn is_entrypoint(&self) -> bool {

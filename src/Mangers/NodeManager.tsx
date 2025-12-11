@@ -351,6 +351,7 @@ export class NodeManager{
       let node = tab.nodes[i];
 
       let nodeOutputs = [];
+      let nodeInputs = [];
 
       for (let j = 0; j < node.outputs.length; j++) {
         let output = node.outputs[j];
@@ -367,12 +368,28 @@ export class NodeManager{
         })
       }
 
+      for (let j = 0; j < node.inputs.length; j++) {
+        let input = node.inputs[j];
+
+        nodeInputs.push({
+          name: input.name,
+          type: input.type,
+          connections: input.connections.map(x => { return {
+            name: x.name,
+            node: x.parent.id,
+            index: x.index,
+            type: x.type
+          }})
+        })
+      }
+
       nodesToSave.push({
         name: node.name,
         id: node.id,
         typeId: node.typeId,
         pos: [ node.x, node.y ],
         outputs: nodeOutputs,
+        inputs: nodeInputs,
         statics: node.statics
       })
     }

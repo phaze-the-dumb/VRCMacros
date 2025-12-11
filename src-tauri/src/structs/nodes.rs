@@ -5,7 +5,8 @@ use serde_json::Value;
 pub struct Node {
   pub id: String,
   pub name: String,
-  pub outputs: Vec<NodeOutput>,
+  pub outputs: Vec<NodeIO>,
+  pub inputs: Vec<NodeIO>,
   pub pos: [f32; 2],
   pub statics: Vec<NodeStatic>,
 
@@ -23,7 +24,7 @@ pub struct NodeStatic {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct NodeOutput {
+pub struct NodeIO {
   pub name: String,
 
   #[serde(rename = "type")]

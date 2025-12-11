@@ -11,10 +11,7 @@ use serde_json::{Map, Value};
 use tauri::{App, Emitter, Listener, Manager, WindowEvent};
 
 use crate::{
-  osc::{self, OSCMessage},
-  runtime::{commands::RuntimeCommand, nodes::RuntimeNodeTree, runtime, runtime_dry},
-  structs::parameter_types::ParameterType,
-  utils::setup_traymenu::setup_traymenu,
+  osc::{self, OSCMessage}, runtime::{commands::RuntimeCommand, nodes::RuntimeNodeTree, recurse_runtime}, structs::parameter_types::ParameterType, utils::setup_traymenu::setup_traymenu
 };
 
 pub fn setup(
@@ -97,8 +94,8 @@ pub fn setup(
   tokio::spawn(async move {
     let mut tabs: HashMap<String, RuntimeNodeTree> = HashMap::new();
 
-    #[cfg(target_os = "windows")]
-    let enigo = Arc::new(Mutex::new(Enigo::new(&Settings::default()).unwrap()));
+    // #[cfg(target_os = "windows")]
+    let enigo = Arc::new(Mutex::new(enigo::Enigo::new(&enigo::Settings::default()).unwrap()));
 
     loop {
       let cmd = runtime_receiver.recv().unwrap();
@@ -108,36 +105,26 @@ pub fn setup(
           for (_, mut tab) in &mut tabs {
             let keys: Vec<String> = tab.nodes.keys().map(|x| x.clone()).collect();
 
-            for id in keys.clone() {
-              let entry = tab.nodes[&id].is_entrypoint();
-
-              if entry {
-                let args = vec![
-                  vec![ParameterType::String(msg.address.clone())],
-                  msg.values.clone(),
-                ]
-                .concat();
-
-                runtime_dry(id.clone(), &args, &mut tab).unwrap();
-              }
-            }
-
             for id in keys {
               let entry = tab.nodes[&id].is_entrypoint();
 
               if entry {
-                let _ = runtime(id.clone(), &mut tab);
+                let mut args = vec![ ParameterType::String(msg.address.clone())];
+                let mut values = msg.values.clone();
+
+                args.append(&mut values);
+                let _ = recurse_runtime(id.clone(), &mut tab, args);
               }
             }
           }
         }
 
         RuntimeCommand::AddTab(graph, id) => {
-          #[cfg(target_os = "windows")]
+          // #[cfg(target_os = "windows")]
           tabs.insert(id, RuntimeNodeTree::from(graph, enigo.clone()));
 
-          #[cfg(target_os = "linux")]
-          tabs.insert(id, RuntimeNodeTree::from(graph));
+          // #[cfg(target_os = "linux")]
+          // tabs.insert(id, RuntimeNodeTree::from(graph));
         }
         RuntimeCommand::RemoveTab(id) => {
           tabs.remove(&id);

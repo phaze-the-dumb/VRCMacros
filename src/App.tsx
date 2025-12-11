@@ -15,6 +15,8 @@ import { ConfirmationPopup } from "./components/ConfirmationPopup";
 import * as keybinds from './keybinds';
 import { listen } from "@tauri-apps/api/event";
 
+// TODO: Only allow one node to input on non-flow inputs
+
 let App = () => {
   let [ selectedNodes, setSelectedNodes ] = createSignal<Node[]>([], { equals: false });
   let [ mousePos, setMousePos ] = createSignal<[ number, number ]>([ 0, 0 ]);

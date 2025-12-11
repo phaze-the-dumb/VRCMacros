@@ -7,44 +7,52 @@ use crate::{
 };
 
 pub struct OSCActionsSendChatbox {
-  to_log: String,
+  outputs: Vec<Vec<(String, isize, isize)>>,
+  inputs: Vec<Option<(String, isize, isize)>>,
 }
 
 impl OSCActionsSendChatbox {
-  pub fn new(_: Node) -> Box<Self> {
-    Box::new(Self { to_log: "".into() })
+  pub fn new(node: Node) -> Box<Self> {
+    Box::new(Self {
+      outputs: node.outputs.iter().map(|x| {
+        x.connections.iter()
+          .map(|x| (x.node.clone(), x.index, x.value_type)).collect()}).collect(),
+
+      inputs: node.inputs.iter().map(|x| {
+        let y = x.connections.get(0);
+        if let Some(y) = y{
+          Some((y.node.clone(), y.index, y.value_type))
+        } else{
+          None
+        }
+      }).collect(),
+    })
   }
 }
 
 impl RuntimeNode for OSCActionsSendChatbox {
   fn outputs(&self) -> Vec<Vec<(String, isize, isize)>> {
-    vec![]
-  }
-  fn execute_dry(&mut self, _: &Vec<ParameterType>) -> Option<Vec<ParameterType>> {
-    Some(vec![])
+    self.outputs.clone()
   }
 
-  fn execute(&mut self) -> Option<Vec<ParameterType>> {
-    osc::send_message(
-      "/chatbox/input",
-      vec![
-        ParameterType::String(self.to_log.clone()),
-        ParameterType::Boolean(true),
-        ParameterType::Boolean(false),
-      ],
-      "127.0.0.1:9000",
-    );
-
-    None
+  fn inputs(&self) -> Vec<Option<(String, isize, isize)>> {
+    self.inputs.clone()
   }
 
-  fn update_arg(&mut self, index: usize, value: ParameterType) -> bool {
-    if index == 1 {
-      self.to_log = value.as_string().unwrap();
-      true
-    } else {
-      false
+  fn execute(&mut self, args: Vec<ParameterType>) -> Vec<ParameterType> {
+    if let Ok(msg) = args[1].as_string(){
+      osc::send_message(
+        "/chatbox/input",
+        vec![
+          ParameterType::String(msg.clone()),
+          ParameterType::Boolean(true),
+          ParameterType::Boolean(false),
+        ],
+        "127.0.0.1:9000",
+      );
     }
+
+    vec![]
   }
 
   fn is_entrypoint(&self) -> bool {
