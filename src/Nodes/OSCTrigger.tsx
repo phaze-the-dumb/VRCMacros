@@ -41,14 +41,9 @@ export let NodeOSCTrigger: NodeDefinition = {
       }
     }
 
-    node.outputs.map(output => {
-      output.connections.map(partner => {
-        partner.connections = partner.connections.filter(x => x != output);
-      })
-    })
-    node.outputs = [];
+    let tempOutputs = [];
 
-    node.outputs.push({
+    tempOutputs.push({
       name: 'Flow',
       type: NodeType.Flow,
       connections: [],
@@ -75,7 +70,7 @@ export let NodeOSCTrigger: NodeDefinition = {
       }
 
       if(type){
-        node.outputs.push({
+        tempOutputs.push({
           name: dat.desc === '' ? dat.type : dat.desc,
           type: type,
           connections: [],
@@ -85,7 +80,28 @@ export let NodeOSCTrigger: NodeDefinition = {
       }
     });
 
-    node.h = 60 + (parameters.length + 1) * 30;
+    let hasChanged = false;
+
+    for(let i in tempOutputs){
+      if(
+        node.outputs[i] === undefined ||
+        tempOutputs[i].type != node.outputs[i].type
+      ){
+        hasChanged = true;
+      }
+    }
+
+    if(hasChanged){
+      node.outputs.map(output => {
+        output.connections.map(partner => {
+          partner.connections = partner.connections.filter(x => x != output);
+        })
+      })
+
+      node.outputs = tempOutputs;
+      node.h = 60 + (parameters.length + 1) * 30;
+    }
+
     NodeManager.Instance.UpdateConfig();
   }
 };
