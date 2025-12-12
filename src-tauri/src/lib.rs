@@ -3,7 +3,7 @@ use std::{fs, sync::Mutex};
 use crossbeam_channel::bounded;
 use frontend_calls::*;
 
-use crate::{osc::OSCMessage, setup::setup, utils::config::Config};
+use crate::{osc::OSCMessage, setup::setup, utils::{config::Config, vrchat_builtin_parameters}};
 
 mod frontend_calls;
 mod osc;
@@ -11,9 +11,6 @@ mod runtime;
 mod setup;
 mod structs;
 mod utils;
-
-// TODO: Add built-in OSC endpoints
-// TODO: Read avatar paramaters from file
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[tokio::main]
@@ -35,6 +32,10 @@ pub async fn run() {
   let conf = Config::new(conf_file);
 
   static ADDRESSES: Mutex<Vec<OSCMessage>> = Mutex::new(Vec::new());
+
+  let mut addresses = ADDRESSES.lock().unwrap();
+  addresses.append(&mut vrchat_builtin_parameters::get_read_addresses());
+  drop(addresses);
 
   let (runtime_sender, runtime_receiver) = bounded(1024);
 

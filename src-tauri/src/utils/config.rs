@@ -19,13 +19,9 @@ pub struct ConfigValues {
 
   #[serde(default)]
   pub hide_editor_on_start: bool,
-
-  #[serde(default)]
-  pub last_save: i64,
 }
 
 pub struct Config {
-
   pub store: Mutex<ConfigValues>,
   path: PathBuf,
 }
@@ -52,7 +48,6 @@ impl Config {
 
   pub fn save(&self) {
     let mut dat = self.store.lock().unwrap();
-    dat.last_save = Utc::now().timestamp();
 
     let dat = serde_json::to_string(&*dat).unwrap();
 
@@ -64,8 +59,6 @@ impl Config {
   }
 
   pub fn save_prelocked(&self, mut dat: MutexGuard<'_, ConfigValues>) {
-    dat.last_save = Utc::now().timestamp();
-
     let dat = serde_json::to_string(&*dat).unwrap();
 
     let file = File::create(&self.path).unwrap();

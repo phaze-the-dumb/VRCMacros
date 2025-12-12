@@ -11,7 +11,7 @@ use serde_json::{Map, Value};
 use tauri::{App, Emitter, Listener, Manager, WindowEvent};
 
 use crate::{
-  osc::{self, OSCMessage}, runtime::{commands::RuntimeCommand, nodes::RuntimeNodeTree, recurse_runtime}, structs::parameter_types::ParameterType, utils::setup_traymenu::setup_traymenu
+  osc::{self, OSCMessage}, runtime::{commands::RuntimeCommand, nodes::RuntimeNodeTree, recurse_runtime}, structs::parameter_types::ParameterType, utils::{setup_traymenu::setup_traymenu, vrchat_builtin_parameters}
 };
 
 pub fn setup(
@@ -89,6 +89,12 @@ pub fn setup(
         addrs.push(msg);
       }
 
+      if message.address == "/avatar/change".to_owned(){
+        *addrs = vrchat_builtin_parameters::get_read_addresses();
+
+        // TODO: Read avatar paramaters from file
+      }
+
       runtime_sender
         .send(RuntimeCommand::OSCMessage(message))
         .unwrap();
@@ -96,7 +102,6 @@ pub fn setup(
   });
 
   // TODO: Run tabs in seperate threads (really not looking forward to this... thanks rust)
-  // TODO: Support multiple flow inputs on a node
 
   tokio::spawn(async move {
     let mut tabs: HashMap<String, RuntimeNodeTree> = HashMap::new();

@@ -20,10 +20,9 @@ pub fn sync_tab(
     .unwrap();
 
   let mut config = conf.store.lock().unwrap();
-  config.loaded_tabs.insert(id, (graph, name, location, save_state)); // TODO: When loading a tab into config, store the save state of it too
+  config.loaded_tabs.insert(id, (graph, name, location, save_state));
 
-  // If we haven't updated the config in the last second, let's update it again.
-  if config.last_save + 1 < Utc::now().timestamp(){ conf.save_prelocked(config); }
+  conf.save_prelocked(config);
 }
 
 #[tauri::command]

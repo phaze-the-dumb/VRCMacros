@@ -6,12 +6,10 @@ import { decodeNodeList, encodeNodeList } from "./utils/clipboard";
 
 let isKeyDown: any = {};
 
-export let load = ( mousePos: Accessor<[ number, number ]>, selectedNode: Accessor<Node[]>, setSelectedNode: Setter<Node[]> ) => {
+export let load = ( canvas: HTMLCanvasElement, mousePos: Accessor<[ number, number ]>, selectedNode: Accessor<Node[]>, setSelectedNode: Setter<Node[]> ) => {
   // TODO: Add undo / redo -ing
 
-  window.onkeydown = async ( e ) => {
-    isKeyDown[e.key] = true;
-
+  canvas.onkeydown = async ( e ) => {
     switch(e.key){
       case 'Delete':
         let nodes = selectedNode();
@@ -33,6 +31,13 @@ export let load = ( mousePos: Accessor<[ number, number ]>, selectedNode: Access
 
         setSelectedNode([]);
         break;
+    }
+  }
+
+  window.onkeydown = async ( e ) => {
+    isKeyDown[e.key] = true;
+
+    switch(e.key){
       case 's':
         if(e.ctrlKey){
           let currentTab = NodeManager.Instance.CurrentTab();

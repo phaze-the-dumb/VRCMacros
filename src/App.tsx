@@ -404,7 +404,7 @@ let App = () => {
       isMouseDown = false;
     }
 
-    keybinds.load(mousePos, selectedNodes, setSelectedNodes);
+    keybinds.load(canvas, mousePos, selectedNodes, setSelectedNodes);
     requestAnimationFrame(update);
 
     let unlisten_0 = await listen('hide-window', () => {

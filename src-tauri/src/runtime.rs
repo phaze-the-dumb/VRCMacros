@@ -15,6 +15,7 @@ pub fn recurse_runtime(entry: String, tab: &mut RuntimeNodeTree, args: Vec<Param
   let mut next_node_args: HashMap<String, Vec<ParameterType>> = HashMap::new();
 
   for i in 0..out_args.len(){
+    if output_map.len() <= i { break; }
     let links = &output_map[i];
 
     for ( id, link_index, _ ) in links{
@@ -73,7 +74,6 @@ pub fn runtime(entry: String, tab: &mut RuntimeNodeTree, mut args: Vec<Parameter
 
   for ( id, needed ) in needed_input_nodes{
     let (out_args, _) = runtime(id, tab, vec![]).unwrap();
-    // TODO: Combine output with args
 
     for ( output, input ) in needed{
       let arg = &out_args[output as usize];
