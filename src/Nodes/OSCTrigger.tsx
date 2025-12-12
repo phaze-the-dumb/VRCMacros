@@ -12,7 +12,6 @@ export let NodeOSCTrigger: NodeDefinition = {
   typeId: 'osctrigger',
 
   w: 200,
-  h: 50,
 
   statics: [
     {
@@ -99,7 +98,7 @@ export let NodeOSCTrigger: NodeDefinition = {
       })
 
       node.outputs = tempOutputs;
-      node.h = 60 + (parameters.length + 1) * 30;
+      node.updateSize();
     }
 
     NodeManager.Instance.UpdateConfig();

@@ -55,9 +55,7 @@ pub fn runtime(entry: String, tab: &mut RuntimeNodeTree, mut args: Vec<Parameter
   if node.is_none() { bail!("Cannot find node"); }
 
   let node = node.unwrap();
-
   let inputs = node.inputs();
-  dbg!(&inputs);
 
   let mut needed_input_nodes = HashMap::new();
 
@@ -72,8 +70,6 @@ pub fn runtime(entry: String, tab: &mut RuntimeNodeTree, mut args: Vec<Parameter
       }
     }
   }
-
-  dbg!(&needed_input_nodes);
 
   for ( id, needed ) in needed_input_nodes{
     let (out_args, _) = runtime(id, tab, vec![]).unwrap();

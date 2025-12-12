@@ -9,7 +9,6 @@ export let NodeConditionalIfEqual: NodeDefinition = {
   typeId: 'ifequal',
 
   w: 220,
-  h: 150,
 
   statics: [{
     type: NodeType.Label,

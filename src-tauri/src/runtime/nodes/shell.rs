@@ -1,4 +1,4 @@
-use std::process::Command;
+use std::{io::Stdin, process::{Command, Stdio}};
 
 use crate::{
   runtime::nodes::RuntimeNode,
@@ -40,13 +40,14 @@ impl RuntimeNode for ShellCommand {
 
   fn execute(&mut self, args: Vec<ParameterType>) -> Vec<ParameterType> {
     if let Ok(cmd) = args[1].as_string(){
-      dbg!(&cmd);
-
       if cmd != ""{
         let mut split_cmd = cmd.split(" ");
 
         let mut cmd = Command::new(split_cmd.nth(0).unwrap());
         if split_cmd.clone().count() > 0{ cmd.args(split_cmd); }
+
+        cmd.stdout(Stdio::piped());
+        cmd.stderr(Stdio::piped());
 
         let child = cmd.spawn().unwrap();
         let output = child.wait_with_output().unwrap();

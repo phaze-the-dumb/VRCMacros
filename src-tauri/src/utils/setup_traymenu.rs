@@ -11,13 +11,13 @@ pub fn setup_traymenu(handle: &AppHandle) {
     .build(handle)
     .unwrap();
 
-  let hide = MenuItemBuilder::new("Hide / Show Editor")
-    .id("hide")
+  let show = MenuItemBuilder::new("Show Editor")
+    .id("show")
     .build(handle)
     .unwrap();
 
   let tray_menu = MenuBuilder::new(handle)
-    .items(&[&quit, &hide])
+    .items(&[&quit, &show])
     .build()
     .unwrap();
 
@@ -30,19 +30,13 @@ pub fn setup_traymenu(handle: &AppHandle) {
       "quit" => {
         app.emit("prompt_to_close", ()).unwrap();
       }
-      "hide" => {
+      "show" => {
         let window = app.get_webview_window("main").unwrap();
 
-        if window.is_visible().unwrap() {
-          window.hide().unwrap();
+        window.show().unwrap();
+        window.set_focus().unwrap();
 
-          window.emit("hide-window", ()).unwrap();
-        } else {
-          window.show().unwrap();
-          window.set_focus().unwrap();
-
-          window.emit("show-window", ()).unwrap();
-        }
+        window.emit("show-window", ()).unwrap();
       }
       _ => {}
     })

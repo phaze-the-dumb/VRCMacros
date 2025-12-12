@@ -9,7 +9,6 @@ export let NodeStaticsInt: NodeDefinition = {
   typeId: 'staticint',
 
   w: 200,
-  h: 80,
 
   statics: [{
     type: NodeType.Int,

@@ -17,7 +17,6 @@ export interface NodeDefinition{
   onStaticsUpdate?: ( node: Node ) => Promise<void>,
   // build?: ( pos: [ number, number ], onStaticsUpdate: ( node: Node ) => void ) => Promise<Node>,
   w?: number,
-  h?: number,
   statics?: NodeStatic[],
   inputs?: { name: string, type: NodeType }[],
   outputs?: { name: string, type: NodeType }[],
@@ -29,7 +28,7 @@ export interface NodeDefinitionHashMap {
   [details: string] : NodeDefinition;
 }
 
-// TODO: (Node Additions) Pressing keyboard keys
+// TODO: (Node Additions) Pressing keyboard keys (like to do linux, but has extra steps)
 // TODO: (Node Additions) Getting media state from os
 // TODO: (Node Additions) Sending custom OSC messages
 // TODO: (Node Additions) Sending HTTP requests?

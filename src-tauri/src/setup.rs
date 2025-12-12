@@ -23,12 +23,19 @@ pub fn setup(
   window.hide().unwrap();
 
   let win_handle = window.clone();
+
   window.on_window_event(move |event| match event {
     WindowEvent::CloseRequested { api, .. } => {
       api.prevent_close();
-
-      win_handle.hide().unwrap();
-      win_handle.emit("hide-window", ()).unwrap();
+      win_handle.emit("prompt_to_close", ()).unwrap();
+    }
+    WindowEvent::Resized(_) => {
+      let minimised = win_handle.is_minimized().unwrap();
+      if minimised{
+        win_handle.hide().unwrap();
+        win_handle.emit("hide-window", ()).unwrap();
+        win_handle.unminimize().unwrap();
+      }
     }
     _ => {}
   });

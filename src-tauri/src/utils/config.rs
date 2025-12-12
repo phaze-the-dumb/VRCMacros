@@ -3,9 +3,10 @@ use std::{
   fs::File,
   io::{Read, Write},
   path::PathBuf,
-  sync::Mutex,
+  sync::{Mutex, MutexGuard},
 };
 
+use chrono::Utc;
 use flate2::{read::GzDecoder, write::GzEncoder, Compression};
 use serde::{Deserialize, Serialize};
 
@@ -14,13 +15,17 @@ use crate::structs::nodes::Node;
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ConfigValues {
   #[serde(default)]
-  pub loaded_tabs: HashMap<String, (Vec<Node>, String, Option<String>)>,
+  pub loaded_tabs: HashMap<String, (Vec<Node>, String, Option<String>, bool)>,
 
   #[serde(default)]
   pub hide_editor_on_start: bool,
+
+  #[serde(default)]
+  pub last_save: i64,
 }
 
 pub struct Config {
+
   pub store: Mutex<ConfigValues>,
   path: PathBuf,
 }
@@ -39,8 +44,6 @@ impl Config {
 
     let json: ConfigValues = serde_json::from_str(&json_string).unwrap();
 
-    dbg!(&json);
-
     Config {
       store: Mutex::new(json),
       path: path,
@@ -48,8 +51,22 @@ impl Config {
   }
 
   pub fn save(&self) {
-    let dat = serde_json::to_string(&self.store.lock().unwrap().clone()).unwrap();
-    dbg!(&dat);
+    let mut dat = self.store.lock().unwrap();
+    dat.last_save = Utc::now().timestamp();
+
+    let dat = serde_json::to_string(&*dat).unwrap();
+
+    let file = File::create(&self.path).unwrap();
+    let mut encoder = GzEncoder::new(file, Compression::default());
+
+    encoder.write_all(dat.as_bytes()).unwrap();
+    encoder.finish().unwrap();
+  }
+
+  pub fn save_prelocked(&self, mut dat: MutexGuard<'_, ConfigValues>) {
+    dat.last_save = Utc::now().timestamp();
+
+    let dat = serde_json::to_string(&*dat).unwrap();
 
     let file = File::create(&self.path).unwrap();
     let mut encoder = GzEncoder::new(file, Compression::default());

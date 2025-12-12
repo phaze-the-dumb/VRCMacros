@@ -20,8 +20,6 @@ export class Node{
     this.typeId = node.typeId!;
     this.x = pos[0];
     this.y = pos[1];
-    this.w = node.w!;
-    this.h = node.h!;
 
     this.inputs = node.inputs ? node.inputs.map(( x, indx ) => {
       return {
@@ -43,9 +41,16 @@ export class Node{
       }
     }) : [];
 
+    this.w = node.w || 200;
+    this.h = 50 + Math.max(this.outputs.length, this.inputs.length) * 30;
+
     this.selected = false;
     this.statics = node.statics!,
     this.onStaticsUpdate = node.onStaticsUpdate!;
+  }
+
+  updateSize(){
+    this.h = 50 + Math.max(this.outputs.length, this.inputs.length) * 30;
   }
 }
 

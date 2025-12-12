@@ -9,7 +9,6 @@ export let NodeShellCommand: NodeDefinition = {
   typeId: 'shellcommand',
 
   w: 200,
-  h: 120,
 
   statics: [],
 

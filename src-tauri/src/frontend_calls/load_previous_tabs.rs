@@ -8,7 +8,7 @@ use crate::{structs::nodes::Node, utils::config::Config};
 pub fn load_previous_tabs(
   window: Window,
   conf: State<Config>,
-) -> HashMap<String, (Vec<Node>, String, Option<String>)> {
+) -> HashMap<String, (Vec<Node>, String, Option<String>, bool)> {
   let config = conf.store.lock().unwrap();
 
   if !config.hide_editor_on_start {

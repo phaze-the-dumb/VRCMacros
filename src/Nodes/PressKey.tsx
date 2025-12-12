@@ -9,7 +9,6 @@ export let NodePressKey: NodeDefinition = {
   typeId: 'presskey',
 
   w: 200,
-  h: 80,
 
   statics: [
     {

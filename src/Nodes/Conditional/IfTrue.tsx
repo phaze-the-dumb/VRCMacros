@@ -9,7 +9,6 @@ export let NodeConditionalIfTrue: NodeDefinition = {
   typeId: 'iftrue',
 
   w: 220,
-  h: 120,
 
   statics: [{
     type: NodeType.Label,

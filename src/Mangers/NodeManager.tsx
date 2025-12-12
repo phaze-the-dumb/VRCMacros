@@ -27,7 +27,14 @@ export class NodeManager{
     setInterval(() => {
       let tabs = Object.values(this._tabs).filter(x => x.needSync);
       for(let tab of tabs){
-        invoke('sync_tab', { graph: this._generateTabGraph(tab.id)[0], id: tab.id, name: tab.name, location: tab.saveLocation });
+        invoke('sync_tab', {
+          graph: this._generateTabGraph(tab.id)[0],
+          id: tab.id,
+          name: tab.name,
+          location: tab.saveLocation,
+          saveState: tab.needsSave()
+        });
+
         tab.needSync = false;
       }
     }, 1000);
@@ -40,11 +47,14 @@ export class NodeManager{
       let version = await getVersion();
 
       for(let tab of Object.entries<any>(tabs)){
-        await this._loadFromConfig(tab[1][2], tab[0], JSON.stringify({
+        let loaded_tab = await this._loadFromConfig(tab[1][2], tab[0], JSON.stringify({
           tab_name: tab[1][1],
           version,
           graph: tab[1][0]
         }));
+
+        if(loaded_tab)
+          loaded_tab.setNeedsSave(tab[1][3]);
       };
 
       this.UpdateConfig();
@@ -336,6 +346,8 @@ export class NodeManager{
 
     tab.needSync = false;
     if(!id)this.UpdateConfig(false);
+
+    return tab;
   }
 
   private _generateTabGraph( tabId: string | null ): [ any, Tab | null ]{

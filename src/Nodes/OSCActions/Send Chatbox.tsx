@@ -9,7 +9,6 @@ export let NodeOSCActionsSendChatbox: NodeDefinition = {
   typeId: 'oscsendchatbox',
 
   w: 200,
-  h: 120,
 
   statics: [{
     type: NodeType.Label,

@@ -9,7 +9,6 @@ export let NodeDebug: NodeDefinition = {
   typeId: 'debug',
 
   w: 200,
-  h: 110,
 
   statics: [
     {
